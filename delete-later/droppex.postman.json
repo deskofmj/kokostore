@@ -1,0 +1,325 @@
+{
+	"info": {
+		"_postman_id": "531e0530-545d-41b6-a80a-ee707413fc42",
+		"name": "Droppex",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "8090726"
+	},
+	"item": [
+		{
+			"name": "Colis",
+			"item": [
+				{
+					"name": "List",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "action",
+									"value": "list",
+									"type": "text"
+								},
+								{
+									"key": "code_api",
+									"value": "582",
+									"type": "text"
+								},
+								{
+									"key": "cle_api",
+									"value": "5VnhlnchEpIglis9nBra",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url_droppex_dev}}",
+							"host": [
+								"{{url_droppex_dev}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "action",
+									"value": "get",
+									"type": "text"
+								},
+								{
+									"key": "code_api",
+									"value": "582",
+									"type": "text"
+								},
+								{
+									"key": "cle_api",
+									"value": "5VnhlnchEpIglis9nBra",
+									"type": "text"
+								},
+								{
+									"key": "code_barre",
+									"value": "619090000003",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url_droppex_dev}}",
+							"host": [
+								"{{url_droppex_dev}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "action",
+									"value": "add",
+									"type": "text"
+								},
+								{
+									"key": "code_api",
+									"value": "582",
+									"type": "text"
+								},
+								{
+									"key": "cle_api",
+									"value": "5VnhlnchEpIglis9nBra",
+									"type": "text"
+								},
+								{
+									"key": "tel_l",
+									"value": "12345678",
+									"type": "text"
+								},
+								{
+									"key": "nom_client",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "gov_l",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "cod",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "libelle",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "nb_piece",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "adresse_l",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "remarque",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "tel2_l",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "service",
+									"value": "Livraison",
+									"description": "NB: Livraison ou Echange",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url_droppex_dev}}",
+							"host": [
+								"{{url_droppex_dev}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "action",
+									"value": "update",
+									"type": "text"
+								},
+								{
+									"key": "code_api",
+									"value": "582",
+									"type": "text"
+								},
+								{
+									"key": "cle_api",
+									"value": "5VnhlnchEpIglis9nBra",
+									"type": "text"
+								},
+								{
+									"key": "code_barre",
+									"value": "619090000004",
+									"type": "text"
+								},
+								{
+									"key": "tel_l",
+									"value": "12345678",
+									"type": "text"
+								},
+								{
+									"key": "nom_client",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "gov_l",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "cod",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "libelle",
+									"value": "1",
+									"description": "non obligatoire",
+									"type": "text"
+								},
+								{
+									"key": "nb_piece",
+									"value": "1",
+									"description": "non obligatoire",
+									"type": "text"
+								},
+								{
+									"key": "adresse_l",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "remarque",
+									"value": "1",
+									"description": "non obligatoire",
+									"type": "text"
+								},
+								{
+									"key": "tel2_l",
+									"value": "1",
+									"description": "non obligatoire",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url_droppex_dev}}",
+							"host": [
+								"{{url_droppex_dev}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "action",
+									"value": "delete",
+									"type": "text"
+								},
+								{
+									"key": "code_api",
+									"value": "582",
+									"type": "text"
+								},
+								{
+									"key": "cle_api",
+									"value": "5VnhlnchEpIglis9nBra",
+									"type": "text"
+								},
+								{
+									"key": "code_barre",
+									"value": "619090000003",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url_droppex_dev}}",
+							"host": [
+								"{{url_droppex_dev}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

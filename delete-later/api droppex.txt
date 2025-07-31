@@ -1,0 +1,15 @@
+eBonjour,
+
+Veuillez importer ces deux fichiers séparément sur Postman pour tester les apis et les utiliser:
+1.	droppex.postman.json: À importer sous la rubrique collection
+2.	url_droppex.postman.json: Veuillez importer ce fichier sous rubrique environnement en Postman:
+•	Il contient deux url:
+•	Environnement dev (url_dev) pour test
+•	Code_Api : 582
+•	Cle_Api: 5VnhlnchEpIglis9nBra
+•	Environnement prod (url_prod) pour production
+•	Code_Api :1044
+•	  ------ fourni par Droppex
+•	Cle_Api: LEyMmMrLtmva65it2dOU
+
+•	  ------ fourni par Droppex

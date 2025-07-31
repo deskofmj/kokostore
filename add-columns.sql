@@ -1,0 +1,2 @@
+ALTER TABLE salmacollection ADD COLUMN IF NOT EXISTS raw JSONB;
+ALTER TABLE salmacollection ADD COLUMN IF NOT EXISTS shop_domain VARCHAR;

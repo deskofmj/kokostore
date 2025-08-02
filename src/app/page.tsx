@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/components/auth-provider'
 import { ProtectedRoute } from '@/components/protected-route'
 import { UserProfile } from '@/components/user-profile'
+import { VerificationModal } from '@/components/verification-modal'
 import { Order } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Checkbox } from '@/components/ui/checkbox'
-import { LogOut, Search, Send, RefreshCw, Eye, Wifi, WifiOff, Package, Truck, AlertCircle, ExternalLink, XCircle, User, Clock, CheckCircle, Info, RotateCcw } from 'lucide-react'
+import { LogOut, Search, Send, RefreshCw, Eye, Wifi, WifiOff, Package, Truck, AlertCircle, ExternalLink, XCircle, User, Clock, CheckCircle, Info, RotateCcw, Loader2 } from 'lucide-react'
 
 export default function Dashboard() {
   const { logout } = useAuth()
@@ -35,6 +36,8 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('new')
   const [statusFilter, setStatusFilter] = useState('all')
   const [debugInfo, setDebugInfo] = useState<any>(null)
+  const [showVerificationModal, setShowVerificationModal] = useState(false)
+  const [ordersToSend, setOrdersToSend] = useState<Order[]>([])
 
   useEffect(() => {
     fetchOrders()
@@ -51,15 +54,21 @@ export default function Dashboard() {
         // Update Shopify status
         if (data.error) {
           setShopifyStatus({ connected: false, message: data.error })
+          console.log('Shopify Connection Error:', data.error)
         } else if (data.message) {
           setShopifyStatus({ connected: false, message: data.message })
+          console.log('Shopify Connection Warning:', data.message)
         } else {
           setShopifyStatus({ connected: true })
+          console.log('Orders Loaded Successfully:', `Loaded ${data.orders?.length || 0} orders from Shopify`)
         }
+      } else {
+        console.log('Failed to Load Orders: Unable to fetch orders from Shopify')
       }
     } catch (error) {
       console.error('Error fetching orders:', error)
       setShopifyStatus({ connected: false, message: 'Failed to connect to Shopify' })
+      console.log('Connection Error: Failed to connect to Shopify. Please check your connection.')
     } finally {
       setLoading(false)
     }
@@ -71,9 +80,19 @@ export default function Dashboard() {
       if (response.ok) {
         const data = await response.json()
         setDroppexStatus(data)
+        
+        // Show status based on current environment
+        if (data.current?.connected) {
+          console.log('Droppex Connected: Successfully connected to Droppex production environment')
+        } else if (data.current?.error) {
+          console.log('Droppex Connection Failed:', data.current.error)
+        }
+      } else {
+        console.log('Droppex Status Error: Unable to check Droppex connection status')
       }
     } catch (error) {
       console.error('Error fetching Droppex status:', error)
+      console.log('Droppex Status Error: Failed to check Droppex connection status')
     } finally {
       setStatusLoading(false)
     }
@@ -85,9 +104,13 @@ export default function Dashboard() {
       if (response.ok) {
         const data = await response.json()
         setDebugInfo(data)
+        console.log('Database Test Successful: Successfully connected to Supabase database')
+      } else {
+        console.log('Database Test Failed: Unable to connect to Supabase database')
       }
     } catch (error) {
       console.error('Error testing connection:', error)
+      console.log('Database Test Error: Failed to test database connection')
     }
   }
 
@@ -108,13 +131,41 @@ export default function Dashboard() {
       })
 
       if (response.ok) {
+        const data = await response.json()
         await fetchOrders() // Refresh orders
         setSelectedOrders([])
+        
+        if (data.success) {
+          console.log('Orders Sent Successfully:', `Successfully sent ${orderIds.length} order(s) to Droppex`)
+        } else {
+          console.log('Failed to Send Orders:', data.error || "An error occurred while sending orders to Droppex")
+        }
+      } else {
+        console.log('Failed to Send Orders: Unable to send orders to Droppex. Please try again.')
       }
     } catch (error) {
       console.error('Error sending orders to Droppex:', error)
+      console.log('Network Error: Failed to send orders to Droppex. Please check your connection.')
     } finally {
       setSendingOrders(false)
+    }
+  }
+
+  const handlePrepareForDroppex = (orderIds: number[]) => {
+    const selectedOrders = orders.filter(order => orderIds.includes(order.id))
+    setOrdersToSend(selectedOrders)
+    setShowVerificationModal(true)
+  }
+
+  const handleRetryFailedOrder = (orderId: number) => {
+    const failedOrder = orders.find(order => order.id === orderId && order.parcel_status === 'Failed')
+    if (failedOrder) {
+      console.log(`Retrying failed order ${orderId}:`, failedOrder)
+      setOrdersToSend([failedOrder])
+      setShowVerificationModal(true)
+    } else {
+      console.log(`Order ${orderId} not found or not in failed status`)
+      console.log('Order Not Found:', `Order ${orderId} not found or not in failed status`)
     }
   }
 
@@ -130,13 +181,21 @@ export default function Dashboard() {
       })
 
       if (response.ok) {
+        const data = await response.json()
         await fetchOrders()
         setSelectedOrder(null)
+        
+        if (data.success) {
+          console.log('Order Reverted Successfully:', `Order ${order.name} has been reverted to 'Not sent' status`)
+        } else {
+          console.log('Failed to Revert Order:', data.error || "An error occurred while reverting the order")
+        }
       } else {
-        console.error('Failed to revert order')
+        console.log('Failed to Revert Order: Unable to revert order. Please try again.')
       }
     } catch (error) {
       console.error('Error reverting order:', error)
+      console.log('Network Error: Failed to revert order. Please check your connection.')
     } finally {
       setSendingOrders(false)
     }
@@ -188,17 +247,61 @@ export default function Dashboard() {
       <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3">
               <div className="p-2 bg-blue-100 rounded-lg">
                 <Package className="h-6 w-6 text-blue-600" />
-              </div>
-              <div>
+                </div>
+                <div>
                 <h1 className="text-xl font-semibold text-gray-900">Order Fulfillment</h1>
                 <p className="text-sm text-gray-500">Shopify • Droppex</p>
+                </div>
               </div>
-            </div>
             
             <div className="flex items-center space-x-3">
+              {/* API Status Indicators */}
+              <div className="flex items-center space-x-3 bg-gray-50 rounded-lg px-3 py-2">
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs text-gray-600">DEV:</span>
+                  {statusLoading ? (
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+                  ) : droppexStatus?.dev.connected ? (
+                    <div title="Dev API Connected">
+                      <Wifi className="w-4 h-4 text-green-500" />
+                    </div>
+                  ) : (
+                    <div title={`Dev API Disconnected: ${droppexStatus?.dev.error}`}>
+                      <WifiOff className="w-4 h-4 text-red-500" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs text-gray-600">PROD:</span>
+                  {statusLoading ? (
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+                  ) : droppexStatus?.prod.connected ? (
+                    <div title="Prod API Connected">
+                      <Wifi className="w-4 h-4 text-green-500" />
+                    </div>
+                  ) : (
+                    <div title={`Prod API Disconnected: ${droppexStatus?.prod.error}`}>
+                      <WifiOff className="w-4 h-4 text-red-500" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs text-gray-600">SHOPIFY:</span>
+                  {shopifyStatus.connected ? (
+                    <div title="Shopify Connected">
+                      <Wifi className="w-4 h-4 text-green-500" />
+                    </div>
+                  ) : (
+                    <div title={`Shopify Disconnected: ${shopifyStatus.message}`}>
+                      <WifiOff className="w-4 h-4 text-red-500" />
+                    </div>
+                  )}
+                </div>
+              </div>
+              
               <Button 
                 onClick={() => { fetchOrders(); fetchDroppexStatus(); }} 
                 disabled={loading}
@@ -218,6 +321,19 @@ export default function Dashboard() {
               >
                 Test DB
               </Button>
+              
+              <Button 
+                onClick={() => {
+                  console.log('Toast Test: This is a test success toast notification!')
+                }}
+                variant="outline"
+                size="sm"
+                className="border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                Test Toast
+              </Button>
+              
+
               
               <UserProfile />
             </div>
@@ -255,7 +371,7 @@ export default function Dashboard() {
               </Select>
               {selectedOrders.length > 0 && (
                 <Button
-                  onClick={() => handleSendToDroppex(selectedOrders)}
+                  onClick={() => handlePrepareForDroppex(selectedOrders)}
                   disabled={sendingOrders}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-medium h-12 px-6"
                 >
@@ -361,7 +477,7 @@ export default function Dashboard() {
                               </Button>
                               <Button 
                                 className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
-                                onClick={() => handleSendToDroppex([order.id])}
+                                onClick={() => handlePrepareForDroppex([order.id])}
                                 disabled={sendingOrders}
                               >
                                 Droppex
@@ -443,10 +559,39 @@ export default function Dashboard() {
                             <Button 
                               variant="outline" 
                               className="border-orange-200 text-orange-700 hover:bg-orange-50"
-                              onClick={() => handleSendToDroppex([order.id])}
+                              onClick={() => handleRevertOrder(order)}
                               disabled={sendingOrders}
                             >
                               Revert
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                              onClick={async () => {
+                                try {
+                                  const trackingNumber = order.droppex_response?.tracking_number || order.droppex_response?.code_barre
+                                  if (!trackingNumber) {
+                                    alert('No tracking number found for this order')
+                                    return
+                                  }
+                                  
+                                  const response = await fetch('/api/verify-droppex-order', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ trackingNumber })
+                                  })
+                                  const result = await response.json()
+                                  console.log('Verification result:', result)
+                                  alert(`Order verification: ${result.exists ? 'EXISTS in Droppex' : 'NOT FOUND in Droppex'}`)
+                                } catch (error) {
+                                  console.error('Verification failed:', error)
+                                  alert('Failed to verify order in Droppex')
+                                }
+                              }}
+                              title="Verify if this order actually exists in Droppex"
+                            >
+                              Verify
                             </Button>
                           </div>
                         </TableCell>
@@ -523,10 +668,18 @@ export default function Dashboard() {
                             </Button>
                             <Button 
                               className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
-                              onClick={() => handleSendToDroppex([order.id])}
+                              onClick={() => handleRetryFailedOrder(order.id)}
                               disabled={sendingOrders}
+                              title="Retry sending this failed order to Droppex"
                             >
-                              Retry
+                              {sendingOrders ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                  Retrying...
+                                </>
+                              ) : (
+                                'Retry'
+                              )}
                             </Button>
                           </div>
                         </TableCell>
@@ -781,7 +934,7 @@ export default function Dashboard() {
             <div className="bg-gray-50 p-6 rounded-b-2xl border-t">
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button
-                  onClick={() => handleSendToDroppex([selectedOrder.id])}
+                  onClick={() => handlePrepareForDroppex([selectedOrder.id])}
                   disabled={sendingOrders}
                   className="bg-blue-600 hover:bg-blue-700 text-white flex-1 h-12 font-semibold"
                 >
@@ -823,6 +976,15 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* Verification Modal */}
+      <VerificationModal
+        isOpen={showVerificationModal}
+        onClose={() => setShowVerificationModal(false)}
+        orders={ordersToSend}
+        onSendToDroppex={handleSendToDroppex}
+        sendingOrders={sendingOrders}
+      />
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 mt-8">

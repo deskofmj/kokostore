@@ -41,7 +41,7 @@ async function testDroppexConnection(config: any, envName: string) {
 
     return {
       environment: envName,
-      connected: response.ok,
+      connected: response.ok && (parsedData.reference || parsedData.message),
       error: response.ok ? undefined : parsedData.message || `HTTP ${response.status}`
     }
   } catch (error) {

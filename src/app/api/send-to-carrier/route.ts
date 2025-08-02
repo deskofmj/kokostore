@@ -19,9 +19,11 @@ export async function POST(request: NextRequest) {
     const results = []
     
     for (const order of ordersToSend) {
-      if (order.parcel_status === 'Not sent') {
+      if (order.parcel_status === 'Not sent' || order.parcel_status === 'Failed') {
         try {
+    
           const droppexResponse = await sendOrderToDroppex(order)
+          
           
           if (droppexResponse.success) {
             await updateOrderStatus(order.id, 'Sent to Droppex', droppexResponse)
@@ -38,7 +40,7 @@ export async function POST(request: NextRequest) {
               error: droppexResponse.error_message
             })
           }
-        } catch (error) {
+                  } catch (error) {
           await updateOrderStatus(order.id, 'Failed', { error: error instanceof Error ? error.message : 'Unknown error' })
           results.push({
             orderId: order.id,

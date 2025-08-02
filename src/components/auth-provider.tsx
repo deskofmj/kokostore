@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         if (now < sessionExpiry) {
           setUser(sessionData.user)
-          setIsAuthenticated(true)
+      setIsAuthenticated(true)
         } else {
           // Session expired, clear it
           localStorage.removeItem('auth_session')
@@ -68,10 +68,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000))
       
-      const adminUsername = process.env.NEXT_PUBLIC_ADMIN_USERNAME || 'admin'
-      const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'
+    const adminUsername = process.env.NEXT_PUBLIC_ADMIN_USERNAME || 'admin'
+    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'
 
-      if (username === adminUsername && password === adminPassword) {
+    if (username === adminUsername && password === adminPassword) {
         const userData: User = {
           id: '1',
           username: username,
@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         
         setUser(userData)
-        setIsAuthenticated(true)
+      setIsAuthenticated(true)
         createSession(userData)
         
         return { success: true }

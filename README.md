@@ -9,6 +9,7 @@ A comprehensive order fulfillment system that integrates Shopify with the Droppe
 - **Order Management**: Modern UI for managing orders with search and filtering
 - **Real-time Updates**: Webhook support for live order updates
 - **Authentication**: Basic hardcoded authentication system
+- **Toast Notifications**: Comprehensive success/error feedback system
 - **Responsive Design**: Works on desktop and mobile devices
 
 ## Tech Stack
@@ -56,7 +57,10 @@ NEXT_PUBLIC_ADMIN_USERNAME=admin
 NEXT_PUBLIC_ADMIN_PASSWORD=your_secure_password
 ```
 
-**Note**: Droppex API credentials are configured via environment variables and automatically switch between dev/prod environments based on NODE_ENV.
+**Note**: 
+- Droppex API credentials are configured via environment variables
+- **Production Environment**: The system is configured to use only the production Droppex environment for all operations
+- Toast notifications provide real-time feedback for all user actions including success, error, warning, and info messages
 
 ### 3. Database Setup
 

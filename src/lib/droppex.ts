@@ -15,8 +15,9 @@ const DROPPEX_CONFIG = {
 }
 
 // Use environment to determine which config to use
-const isDev = process.env.NODE_ENV === 'development'
-const config = isDev ? DROPPEX_CONFIG.dev : DROPPEX_CONFIG.prod
+// Using PRODUCTION environment only - this ensures all operations use the live Droppex API
+const isDev = false // Always use production environment
+export const config = isDev ? DROPPEX_CONFIG.dev : DROPPEX_CONFIG.prod
 
 export interface DroppexPackage {
   action: string
@@ -54,6 +55,8 @@ export async function sendOrderToDroppex(order: Order): Promise<DroppexResponse>
       }
     })
 
+
+
     const response = await fetch(config.url, {
       method: 'POST',
       headers: {
@@ -72,23 +75,18 @@ export async function sendOrderToDroppex(order: Order): Promise<DroppexResponse>
       parsedData = { message: data }
     }
 
-    if (!response.ok) {
-      return {
-        success: false,
-        error_message: parsedData.message || `HTTP ${response.status}`,
-      }
-    }
-
     // Check for success indicators in the response
-    const isSuccess = parsedData.success || 
-                     parsedData.code_barre || 
-                     parsedData.message?.toLowerCase().includes('success') ||
-                     response.status === 200
+    // Based on actual API response: {"reference": 61934246738, "url": "...", "message": "..."}
+    const hasReference = !!parsedData.reference
+    const hasCodeBarre = !!parsedData.code_barre
+    const hasSuccessMessage = parsedData.message?.toLowerCase().includes('success')
+    const hasError = parsedData.error || parsedData.message?.toLowerCase().includes('error')
+    const isSuccess = (hasReference || hasCodeBarre || hasSuccessMessage) && !hasError
 
     return {
       success: isSuccess,
-      tracking_number: parsedData.code_barre,
-      code_barre: parsedData.code_barre,
+      tracking_number: parsedData.reference?.toString() || parsedData.code_barre,
+      code_barre: parsedData.reference?.toString() || parsedData.code_barre,
       message: parsedData.message,
       error_message: isSuccess ? undefined : parsedData.message || 'Unknown error'
     }
@@ -143,6 +141,8 @@ export async function getDroppexPackage(codeBarre: string): Promise<DroppexRespo
       code_barre: codeBarre
     })
 
+
+
     const response = await fetch(config.url, {
       method: 'POST',
       headers: {
@@ -152,6 +152,7 @@ export async function getDroppexPackage(codeBarre: string): Promise<DroppexRespo
     })
 
     const data = await response.text()
+    
     let parsedData: any
     try {
       parsedData = JSON.parse(data)
@@ -159,14 +160,20 @@ export async function getDroppexPackage(codeBarre: string): Promise<DroppexRespo
       parsedData = { message: data }
     }
 
+    // Check if package actually exists
+    const hasPackageData = parsedData.code_barre || parsedData.reference || parsedData.nom_livraison || parsedData.dernier_etat
+    const hasError = parsedData.error || parsedData.message?.toLowerCase().includes('pas trouvé') || parsedData.message?.toLowerCase().includes('not found')
+    
+    const isSuccess = hasPackageData && !hasError
+
     return {
-      success: response.ok,
-      tracking_number: parsedData.code_barre,
-      message: parsedData.message,
-      error_message: response.ok ? undefined : parsedData.message
+      success: isSuccess,
+      tracking_number: parsedData.code_barre || parsedData.reference || codeBarre, // Use original code if not in response
+      message: parsedData.message || parsedData.dernier_etat,
+      error_message: isSuccess ? undefined : parsedData.message || 'Package not found'
     }
-  } catch (error) {
-    return {
+      } catch (error) {
+      return {
       success: false,
       error_message: error instanceof Error ? error.message : 'Unknown error',
     }

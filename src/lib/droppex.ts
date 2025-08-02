@@ -98,36 +98,26 @@ export async function sendOrderToDroppex(order: Order): Promise<DroppexResponse>
   }
 }
 
+import { validateOrderForDroppex } from './data-mapping'
+
 export function mapOrderToDroppexFormat(order: Order): DroppexPackage {
-  // Extract customer information
-  const customerName = order.shipping_address?.name || 
-                      `${order.customer?.first_name || ''} ${order.customer?.last_name || ''}`.trim() ||
-                      'Unknown Customer'
+  // Use the validation function to get properly mapped data
+  const validation = validateOrderForDroppex(order)
   
-  const phone = order.shipping_address?.phone || 
-                order.customer?.phone || 
-                '00000000' // Default phone if none provided
+  if (!validation.isValid) {
+    console.warn('Order validation failed:', validation.errors)
+  }
   
-  const address = order.shipping_address?.address1 || ''
-  const city = order.shipping_address?.city || ''
-  const province = order.shipping_address?.province || ''
-  const zipCode = order.shipping_address?.zip || ''
+  if (validation.warnings.length > 0) {
+    console.warn('Order validation warnings:', validation.warnings)
+  }
   
-  // Map to Droppex format
+  // Return the validated and mapped data
   return {
     action: 'add',
     code_api: config.code_api,
     cle_api: config.cle_api,
-    tel_l: phone,
-    nom_client: customerName,
-    gov_l: province || 'Tunis', // Default to Tunis if no province
-    cod: zipCode || '1000', // Default postal code
-    libelle: `${city} ${province}`.trim() || 'Tunis',
-    nb_piece: order.line_items.length.toString(),
-    adresse_l: address,
-    remarque: order.note || `Order: ${order.name}`,
-    tel2_l: phone, // Same as primary phone
-    service: 'Livraison' // Always "Livraison" for delivery
+    ...validation.mappedData
   }
 }
 

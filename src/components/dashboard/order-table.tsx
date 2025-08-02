@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { DataQualityIndicator } from './data-quality-indicator'
 import { Eye, RotateCcw, Send, AlertCircle, Package, Truck, XCircle } from 'lucide-react'
 
 interface OrderTableProps {
@@ -86,6 +87,7 @@ export function OrderTable({
               <TableHead>Customer</TableHead>
               <TableHead>Total</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Quality</TableHead>
               <TableHead>Created</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -119,7 +121,17 @@ export function OrderTable({
                   </div>
                 </TableCell>
                 <TableCell>
-                  {getStatusBadge(order.parcel_status)}
+                  <div className="flex flex-col gap-2">
+                    {getStatusBadge(order.parcel_status)}
+                    {order.updated_in_shopify && (
+                      <Badge variant="outline" className="text-xs">
+                        Updated in Shopify
+                      </Badge>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <DataQualityIndicator order={order} />
                 </TableCell>
                 <TableCell>
                   <div className="text-sm text-gray-600">
@@ -216,6 +228,12 @@ function OrderDetails({ order }: { order: Order }) {
               <p className="text-sm font-medium text-gray-500">Created</p>
               <p className="text-gray-900">{new Date(order.created_at).toLocaleString()}</p>
             </div>
+            {order.updated_in_shopify && order.updated_at && (
+              <div>
+                <p className="text-sm font-medium text-gray-500">Updated in Shopify</p>
+                <p className="text-gray-900">{new Date(order.updated_at).toLocaleString()}</p>
+              </div>
+            )}
           </div>
         </div>
 

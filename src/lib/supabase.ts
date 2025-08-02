@@ -17,6 +17,8 @@ export interface Order {
   parcel_status: 'Not sent' | 'Sent to Droppex' | 'Failed'
   droppex_response?: any
   created_at_db?: string
+  updated_at?: string
+  updated_in_shopify?: boolean
   // Additional fields for cross-platform compatibility
   raw?: any
   shop_domain?: string
@@ -77,6 +79,8 @@ export async function getOrders() {
     })(),
     droppex_response: item.droppex_response || null,
     created_at_db: item.created_at_db || new Date().toISOString(),
+    updated_at: item.updated_at || null,
+    updated_in_shopify: item.updated_in_shopify || false,
     // Additional fields for cross-platform compatibility
     raw: item.raw || null,
     shop_domain: item.shop_domain || null
@@ -114,5 +118,37 @@ export async function insertOrder(order: Omit<Order, 'parcel_status' | 'created_
 
   if (error) {
     throw new Error(`Error inserting order: ${error.message}`)
+  }
+}
+
+export async function updateOrder(order: Omit<Order, 'parcel_status' | 'created_at_db'>, updatedAt: string) {
+  const supabase = getSupabaseClient()
+  
+  const { error } = await supabase
+    .from('salmacollection')
+    .update({
+      ...order,
+      updated_at: updatedAt,
+      updated_in_shopify: true
+    })
+    .eq('id', order.id)
+
+  if (error) {
+    throw new Error(`Error updating order: ${error.message}`)
+  }
+}
+
+export async function clearUpdatedInShopifyFlag(orderId: number) {
+  const supabase = getSupabaseClient()
+  
+  const { error } = await supabase
+    .from('salmacollection')
+    .update({
+      updated_in_shopify: false
+    })
+    .eq('id', orderId)
+
+  if (error) {
+    throw new Error(`Error clearing updated flag: ${error.message}`)
   }
 } 

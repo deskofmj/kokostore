@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getOrders, updateOrderStatus } from '@/lib/supabase'
+import { getOrders, updateOrderStatus, clearUpdatedInShopifyFlag } from '@/lib/supabase'
 import { sendOrderToDroppex } from '@/lib/droppex'
 
 export async function POST(request: NextRequest) {
@@ -27,6 +27,8 @@ export async function POST(request: NextRequest) {
           
           if (droppexResponse.success) {
             await updateOrderStatus(order.id, 'Sent to Droppex', droppexResponse)
+            // Clear the "Updated in Shopify" flag when order is sent to Droppex
+            await clearUpdatedInShopifyFlag(order.id)
             results.push({
               orderId: order.id,
               success: true,

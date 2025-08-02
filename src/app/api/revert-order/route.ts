@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { updateOrderStatus } from '@/lib/supabase'
+import { updateOrderStatus, clearUpdatedInShopifyFlag } from '@/lib/supabase'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,6 +14,9 @@ export async function POST(request: NextRequest) {
 
     // Revert order status to 'Not sent'
     await updateOrderStatus(orderId, 'Not sent')
+    
+    // Clear the "Updated in Shopify" flag when order is reverted
+    await clearUpdatedInShopifyFlag(orderId)
     
     return NextResponse.json({ 
       success: true,

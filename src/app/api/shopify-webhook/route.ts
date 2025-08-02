@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyWebhookSignature } from '@/lib/shopify'
-import { insertOrder, getOrders } from '@/lib/supabase'
+import { insertOrder, getOrders, updateOrder } from '@/lib/supabase'
 import { mapShopifyOrderToOrder } from '@/lib/shopify'
 
 export async function POST(request: NextRequest) {
@@ -36,6 +36,10 @@ export async function POST(request: NextRequest) {
       // Insert new order
       const order = mapShopifyOrderToOrder(shopifyOrder)
       await insertOrder(order)
+    } else {
+      // Update existing order
+      const order = mapShopifyOrderToOrder(shopifyOrder)
+      await updateOrder(order, new Date().toISOString())
     }
 
     return NextResponse.json({ success: true })

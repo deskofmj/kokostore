@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await new Promise(resolve => setTimeout(resolve, 1000))
       
     const adminUsername = process.env.NEXT_PUBLIC_ADMIN_USERNAME || 'admin'
-    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'
+    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin'
 
     if (username === adminUsername && password === adminPassword) {
         const userData: User = {

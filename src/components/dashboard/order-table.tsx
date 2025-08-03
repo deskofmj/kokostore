@@ -124,8 +124,8 @@ export function OrderTable({
                   <div className="flex flex-col gap-2">
                     {getStatusBadge(order.parcel_status)}
                     {order.updated_in_shopify && (
-                      <Badge variant="outline" className="text-xs">
-                        Updated in Shopify
+                      <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
+                        ✏️ Edited on Shopify
                       </Badge>
                     )}
                   </div>
@@ -230,7 +230,7 @@ function OrderDetails({ order }: { order: Order }) {
             </div>
             {order.updated_in_shopify && order.updated_at && (
               <div>
-                <p className="text-sm font-medium text-gray-500">Updated in Shopify</p>
+                <p className="text-sm font-medium text-gray-500">✏️ Edited on Shopify</p>
                 <p className="text-gray-900">{new Date(order.updated_at).toLocaleString()}</p>
               </div>
             )}

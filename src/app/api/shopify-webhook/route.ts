@@ -8,11 +8,14 @@ export async function POST(request: NextRequest) {
     const body = await request.text()
     const signature = request.headers.get('x-shopify-hmac-sha256')
     const webhookSecret = process.env.SHOPIFY_WEBHOOK_SECRET
+    const topic = request.headers.get('x-shopify-topic-name')
 
-    console.log('Webhook processing started')
+    console.log('=== Shopify Webhook Processing ===')
+    console.log('Topic:', topic)
     console.log('Body length:', body.length)
     console.log('Signature present:', !!signature)
     console.log('Webhook secret present:', !!webhookSecret)
+    console.log('Raw body preview:', body.substring(0, 200) + '...')
 
     if (!signature) {
       console.log('ERROR: Missing webhook signature')
@@ -47,6 +50,12 @@ export async function POST(request: NextRequest) {
     const data = JSON.parse(body)
     const shopifyOrder = data
     console.log('Order ID:', shopifyOrder.id)
+    console.log('Order Name:', shopifyOrder.name)
+    console.log('Order Email:', shopifyOrder.email)
+    console.log('Order Total Price:', shopifyOrder.total_price)
+    console.log('Order Note:', shopifyOrder.note)
+    console.log('Customer Name:', shopifyOrder.customer?.first_name, shopifyOrder.customer?.last_name)
+    console.log('Shipping Address:', shopifyOrder.shipping_address?.address1)
 
     // Check if order already exists
     console.log('Fetching existing orders...')
@@ -61,19 +70,34 @@ export async function POST(request: NextRequest) {
       console.log('Inserting new order...')
       const order = mapShopifyOrderToOrder(shopifyOrder)
       await insertOrder(order)
-      console.log('Order inserted successfully')
+      console.log('✅ Order inserted successfully')
     } else {
       // Update existing order
       console.log('Updating existing order...')
       const order = mapShopifyOrderToOrder(shopifyOrder)
-      await updateOrder(order, new Date().toISOString())
-      console.log('Order updated successfully')
+      const updatedAt = new Date().toISOString()
+      await updateOrder(order, updatedAt)
+      console.log('✅ Order updated successfully')
+      console.log('📝 Updated in Shopify flag set to true')
+      console.log('🕒 Updated at:', updatedAt)
+      console.log('🔄 Order data updated with:', {
+        name: order.name,
+        email: order.email,
+        total_price: order.total_price,
+        note: order.note,
+        customer: order.customer,
+        shipping_address: order.shipping_address
+      })
     }
 
-    console.log('Webhook processing completed successfully')
-    return NextResponse.json({ success: true })
+    console.log('=== Webhook processing completed successfully ===')
+    return NextResponse.json({ 
+      success: true, 
+      action: orderExists ? 'updated' : 'inserted',
+      orderId: shopifyOrder.id 
+    })
   } catch (error) {
-    console.error('Error processing Shopify webhook:', error)
+    console.error('❌ Error processing Shopify webhook:', error)
     return NextResponse.json(
       { error: 'Failed to process webhook', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

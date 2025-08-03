@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Order } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -26,17 +26,20 @@ import {
 interface EditableOrder extends Order {
   isEditing?: boolean
   editedCustomer?: {
-    name: string
-    email: string
-    phone: string
+    first_name?: string
+    last_name?: string
+    email?: string
+    phone?: string
   }
   editedShipping?: {
-    address1: string
+    name?: string
+    address1?: string
     address2?: string
-    city: string
-    state: string
-    zip: string
-    country: string
+    city?: string
+    province?: string
+    zip?: string
+    country?: string
+    phone?: string
   }
 }
 
@@ -59,7 +62,7 @@ export function VerificationModal({
   const [errors, setErrors] = useState<Record<number, string[]>>({})
 
   // Initialize editable orders when modal opens
-  useState(() => {
+  useEffect(() => {
     if (isOpen && orders.length > 0) {
       setEditableOrders(orders.map(order => ({
         ...order,
@@ -67,8 +70,9 @@ export function VerificationModal({
         editedCustomer: undefined,
         editedShipping: undefined
       })))
+      setErrors({})
     }
-  })
+  }, [isOpen, orders])
 
   const totalValue = orders.reduce((sum, order) => sum + (order.total_price || 0), 0)
 
@@ -97,8 +101,14 @@ export function VerificationModal({
         ? { 
             ...o, 
             isEditing: false,
-            customer: o.editedCustomer || o.customer,
-            shipping_address: o.editedShipping || o.shipping_address
+            customer: {
+              ...o.customer,
+              ...o.editedCustomer
+            },
+            shipping_address: {
+              ...o.shipping_address,
+              ...o.editedShipping
+            }
           }
         : o
     ))
@@ -129,7 +139,6 @@ export function VerificationModal({
           ...order,
           editedCustomer: {
             ...order.editedCustomer,
-            ...order.customer,
             [customerField]: value
           }
         }
@@ -141,7 +150,6 @@ export function VerificationModal({
           ...order,
           editedShipping: {
             ...order.editedShipping,
-            ...order.shipping_address,
             [shippingField]: value
           }
         }
@@ -156,24 +164,33 @@ export function VerificationModal({
     const customer = order.editedCustomer || order.customer
     const shipping = order.editedShipping || order.shipping_address
 
-    if (!customer.name?.trim()) errors.push('Customer name is required')
-    if (!customer.email?.trim()) errors.push('Email is required')
-    if (!customer.phone?.trim()) errors.push('Phone is required')
-    if (!shipping.address1?.trim()) errors.push('Address is required')
-    if (!shipping.city?.trim()) errors.push('City is required')
-    if (!shipping.state?.trim()) errors.push('State is required')
-    if (!shipping.zip?.trim()) errors.push('ZIP code is required')
+    // Customer validation
+    const customerName = shipping?.name || 
+                        `${customer?.first_name || ''} ${customer?.last_name || ''}`.trim()
+    if (!customerName) errors.push('Customer name is required')
+    
+    if (!customer?.email?.trim()) errors.push('Email is required')
+    if (!customer?.phone?.trim() && !shipping?.phone?.trim()) errors.push('Phone is required')
+    
+    // Shipping validation
+    if (!shipping?.address1?.trim()) errors.push('Address is required')
+    if (!shipping?.city?.trim()) errors.push('City is required')
+    if (!shipping?.province?.trim()) errors.push('Province is required')
+    if (!shipping?.zip?.trim()) errors.push('ZIP code is required')
 
     // Email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (customer.email && !emailRegex.test(customer.email)) {
+    if (customer?.email && !emailRegex.test(customer.email)) {
       errors.push('Invalid email format')
     }
 
     // Phone format validation (basic)
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/
-    if (customer.phone && !phoneRegex.test(customer.phone.replace(/[\s\-\(\)]/g, ''))) {
-      errors.push('Invalid phone format')
+    const phone = customer?.phone || shipping?.phone
+    if (phone) {
+      const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/
+      if (!phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''))) {
+        errors.push('Invalid phone format')
+      }
     }
 
     return errors
@@ -194,6 +211,46 @@ export function VerificationModal({
 
     if (hasErrors) {
       setErrors(allErrors)
+      return
+    }
+
+    // Create updated orders with edited data
+    const updatedOrders = editableOrders.map(order => {
+      const updatedOrder = { ...order }
+      
+      if (order.editedCustomer) {
+        updatedOrder.customer = {
+          ...updatedOrder.customer,
+          ...order.editedCustomer
+        }
+      }
+      
+      if (order.editedShipping) {
+        updatedOrder.shipping_address = {
+          ...updatedOrder.shipping_address,
+          ...order.editedShipping
+        }
+      }
+      
+      return updatedOrder
+    })
+
+    // Update the orders in the database before sending
+    try {
+      const response = await fetch('/api/update-orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ orders: updatedOrders }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update orders')
+      }
+    } catch (error) {
+      console.error('Error updating orders:', error)
+      setErrors({ 0: ['Failed to update orders before sending'] })
       return
     }
 
@@ -227,7 +284,7 @@ export function VerificationModal({
                   </span>
                 </div>
                 <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                  ${totalValue.toFixed(2)}
+                  {totalValue.toFixed(2)} TND
                 </Badge>
               </div>
               {hasChanges && (
@@ -244,15 +301,17 @@ export function VerificationModal({
               const customer = order.editedCustomer || order.customer
               const shipping = order.editedShipping || order.shipping_address
               const orderErrors = errors[order.id] || []
+              const customerName = shipping?.name || 
+                                 `${customer?.first_name || ''} ${customer?.last_name || ''}`.trim()
 
               return (
                 <div key={order.id} className="border rounded-lg p-4 space-y-4">
                   {/* Order Header */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                                             <span className="font-medium text-gray-900">
-                         Order #{order.id}
-                       </span>
+                      <span className="font-medium text-gray-900">
+                        Order #{order.id}
+                      </span>
                       {order.editedCustomer || order.editedShipping ? (
                         <Badge variant="outline" className="text-xs">
                           Modified
@@ -320,14 +379,14 @@ export function VerificationModal({
                           {order.isEditing ? (
                             <Input
                               id={`name-${order.id}`}
-                              value={customer.name || ''}
-                              onChange={(e) => handleFieldChange(order.id, 'customer.name', e.target.value)}
+                              value={customerName}
+                              onChange={(e) => handleFieldChange(order.id, 'shipping.name', e.target.value)}
                               className="h-8"
                             />
                           ) : (
                             <div className="flex items-center space-x-2 text-sm">
                               <User className="h-4 w-4 text-gray-400" />
-                              <span>{customer.name}</span>
+                              <span>{customerName}</span>
                             </div>
                           )}
                         </div>
@@ -339,14 +398,14 @@ export function VerificationModal({
                             <Input
                               id={`email-${order.id}`}
                               type="email"
-                              value={customer.email || ''}
+                              value={customer?.email || ''}
                               onChange={(e) => handleFieldChange(order.id, 'customer.email', e.target.value)}
                               className="h-8"
                             />
                           ) : (
                             <div className="flex items-center space-x-2 text-sm">
                               <Mail className="h-4 w-4 text-gray-400" />
-                              <span>{customer.email}</span>
+                              <span>{customer?.email}</span>
                             </div>
                           )}
                         </div>
@@ -357,14 +416,14 @@ export function VerificationModal({
                           {order.isEditing ? (
                             <Input
                               id={`phone-${order.id}`}
-                              value={customer.phone || ''}
+                              value={customer?.phone || shipping?.phone || ''}
                               onChange={(e) => handleFieldChange(order.id, 'customer.phone', e.target.value)}
                               className="h-8"
                             />
                           ) : (
                             <div className="flex items-center space-x-2 text-sm">
                               <Phone className="h-4 w-4 text-gray-400" />
-                              <span>{customer.phone}</span>
+                              <span>{customer?.phone || shipping?.phone}</span>
                             </div>
                           )}
                         </div>
@@ -384,14 +443,14 @@ export function VerificationModal({
                           {order.isEditing ? (
                             <Input
                               id={`address1-${order.id}`}
-                              value={shipping.address1 || ''}
+                              value={shipping?.address1 || ''}
                               onChange={(e) => handleFieldChange(order.id, 'shipping.address1', e.target.value)}
                               className="h-8"
                             />
                           ) : (
                             <div className="flex items-start space-x-2 text-sm">
                               <MapPin className="h-4 w-4 text-gray-400 mt-0.5" />
-                              <span>{shipping.address1}</span>
+                              <span>{shipping?.address1}</span>
                             </div>
                           )}
                         </div>
@@ -403,27 +462,27 @@ export function VerificationModal({
                             {order.isEditing ? (
                               <Input
                                 id={`city-${order.id}`}
-                                value={shipping.city || ''}
+                                value={shipping?.city || ''}
                                 onChange={(e) => handleFieldChange(order.id, 'shipping.city', e.target.value)}
                                 className="h-8"
                               />
                             ) : (
-                              <span className="text-sm">{shipping.city}</span>
+                              <span className="text-sm">{shipping?.city}</span>
                             )}
                           </div>
                           <div>
-                            <Label htmlFor={`state-${order.id}`} className="text-xs">
-                              State
+                            <Label htmlFor={`province-${order.id}`} className="text-xs">
+                              Province
                             </Label>
                             {order.isEditing ? (
                               <Input
-                                id={`state-${order.id}`}
-                                value={shipping.state || ''}
-                                onChange={(e) => handleFieldChange(order.id, 'shipping.state', e.target.value)}
+                                id={`province-${order.id}`}
+                                value={shipping?.province || ''}
+                                onChange={(e) => handleFieldChange(order.id, 'shipping.province', e.target.value)}
                                 className="h-8"
                               />
                             ) : (
-                              <span className="text-sm">{shipping.state}</span>
+                              <span className="text-sm">{shipping?.province}</span>
                             )}
                           </div>
                           <div>
@@ -433,12 +492,12 @@ export function VerificationModal({
                             {order.isEditing ? (
                               <Input
                                 id={`zip-${order.id}`}
-                                value={shipping.zip || ''}
+                                value={shipping?.zip || ''}
                                 onChange={(e) => handleFieldChange(order.id, 'shipping.zip', e.target.value)}
                                 className="h-8"
                               />
                             ) : (
-                              <span className="text-sm">{shipping.zip}</span>
+                              <span className="text-sm">{shipping?.zip}</span>
                             )}
                           </div>
                         </div>

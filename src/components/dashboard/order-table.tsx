@@ -117,7 +117,7 @@ export function OrderTable({
                 </TableCell>
                 <TableCell>
                   <div className="font-medium text-gray-900">
-                    ${(order.total_price || 0).toFixed(2)}
+                    {(order.total_price || 0).toFixed(2)} TND
                   </div>
                 </TableCell>
                 <TableCell>
@@ -218,7 +218,7 @@ function OrderDetails({ order }: { order: Order }) {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500">Total Amount</p>
-              <p className="text-gray-900">${(order.total_price || 0).toFixed(2)}</p>
+              <p className="text-gray-900">{(order.total_price || 0).toFixed(2)} TND</p>
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500">Status</p>

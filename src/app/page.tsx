@@ -5,8 +5,6 @@ import { useAuth } from '@/components/auth-provider'
 import { ProtectedRoute } from '@/components/protected-route'
 import { UserProfile } from '@/components/user-profile'
 import { VerificationModal } from '@/components/verification-modal'
-import { StatusIndicators } from '@/components/dashboard/status-indicators'
-import { HeaderActions } from '@/components/dashboard/header-actions'
 import { SearchFilters } from '@/components/dashboard/search-filters'
 import { OrderTable } from '@/components/dashboard/order-table'
 import { useDashboard } from '@/hooks/use-dashboard'
@@ -21,11 +19,6 @@ export default function Dashboard() {
   const handleLogout = () => {
     logout()
     router.push('/login')
-  }
-
-  const handleRefresh = () => {
-    dashboard.fetchOrders()
-    dashboard.fetchDroppexStatus()
   }
 
   return (
@@ -46,18 +39,6 @@ export default function Dashboard() {
               </div>
               
               <div className="flex items-center space-x-3">
-                <StatusIndicators
-                  statusLoading={dashboard.statusLoading}
-                  droppexStatus={dashboard.droppexStatus}
-                  shopifyStatus={dashboard.shopifyStatus}
-                />
-                
-                <HeaderActions
-                  loading={dashboard.loading}
-                  onRefresh={handleRefresh}
-                  onTestConnection={dashboard.testConnection}
-                />
-                
                 <UserProfile />
               </div>
             </div>
@@ -161,6 +142,26 @@ export default function Dashboard() {
           onSendToDroppex={dashboard.handleSendToDroppex}
           sendingOrders={dashboard.sendingOrders}
         />
+
+        {/* Footer */}
+        <footer className="bg-white border-t border-gray-200 mt-12">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex justify-center items-center">
+              <p className="text-sm text-gray-500">
+                © 2025{' '}
+                <a 
+                  href="https://www.deskofmj.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                >
+                  Desk of Mj LTD
+                </a>
+                . All rights reserved.
+              </p>
+            </div>
+          </div>
+        </footer>
       </div>
     </ProtectedRoute>
   )

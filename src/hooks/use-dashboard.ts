@@ -3,12 +3,6 @@
 import { useState, useEffect } from 'react'
 import { Order } from '@/lib/supabase'
 
-interface DroppexStatus {
-  dev: { connected: boolean; error?: string };
-  prod: { connected: boolean; error?: string };
-  current: { connected: boolean; error?: string };
-}
-
 interface ShopifyStatus {
   connected: boolean;
   message?: string;
@@ -22,19 +16,15 @@ export function useDashboard() {
   const [selectedOrders, setSelectedOrders] = useState<number[]>([])
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [sendingOrders, setSendingOrders] = useState(false)
-  const [droppexStatus, setDroppexStatus] = useState<DroppexStatus | null>(null)
-  const [statusLoading, setStatusLoading] = useState(true)
   const [shopifyStatus, setShopifyStatus] = useState<ShopifyStatus>({ connected: false })
   const [activeTab, setActiveTab] = useState('new')
   const [statusFilter, setStatusFilter] = useState('all')
-  const [debugInfo, setDebugInfo] = useState<any>(null)
   const [showVerificationModal, setShowVerificationModal] = useState(false)
   const [ordersToSend, setOrdersToSend] = useState<Order[]>([])
 
   // Initialize data
   useEffect(() => {
     fetchOrders()
-    fetchDroppexStatus()
   }, [])
 
   // API Functions
@@ -64,45 +54,6 @@ export function useDashboard() {
       console.log('Connection Error: Failed to connect to Shopify. Please check your connection.')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const fetchDroppexStatus = async () => {
-    try {
-      const response = await fetch('/api/droppex-status')
-      if (response.ok) {
-        const data = await response.json()
-        setDroppexStatus(data)
-        
-        if (data.current?.connected) {
-          console.log('Droppex Connected: Successfully connected to Droppex production environment')
-        } else if (data.current?.error) {
-          console.log('Droppex Connection Failed:', data.current.error)
-        }
-      } else {
-        console.log('Droppex Status Error: Unable to check Droppex connection status')
-      }
-    } catch (error) {
-      console.error('Error fetching Droppex status:', error)
-      console.log('Droppex Status Error: Failed to check Droppex connection status')
-    } finally {
-      setStatusLoading(false)
-    }
-  }
-
-  const testConnection = async () => {
-    try {
-      const response = await fetch('/api/test-supabase')
-      if (response.ok) {
-        const data = await response.json()
-        setDebugInfo(data)
-        console.log('Database Test Successful: Successfully connected to Supabase database')
-      } else {
-        console.log('Database Test Failed: Unable to connect to Supabase database')
-      }
-    } catch (error) {
-      console.error('Error testing connection:', error)
-      console.log('Database Test Error: Failed to test database connection')
     }
   }
 
@@ -207,21 +158,76 @@ export function useDashboard() {
   }
 
   // Filtering and Search
-  const filteredOrders = orders.filter(order =>
-    order.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.email.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredOrders = orders.filter(order => {
+    const searchLower = searchTerm.toLowerCase()
+    
+    // Search in order name
+    if (order.name?.toLowerCase().includes(searchLower)) return true
+    
+    // Search in email
+    if (order.email?.toLowerCase().includes(searchLower)) return true
+    
+    // Search in customer name
+    const customerName = `${order.customer?.first_name || ''} ${order.customer?.last_name || ''}`.trim()
+    if (customerName.toLowerCase().includes(searchLower)) return true
+    
+    // Search in shipping address name
+    if (order.shipping_address?.name?.toLowerCase().includes(searchLower)) return true
+    
+    // Search in phone numbers
+    const customerPhone = order.customer?.phone || ''
+    const shippingPhone = order.shipping_address?.phone || ''
+    if (customerPhone.toLowerCase().includes(searchLower) || 
+        shippingPhone.toLowerCase().includes(searchLower)) return true
+    
+    // Search in address
+    const address = order.shipping_address?.address1 || ''
+    if (address.toLowerCase().includes(searchLower)) return true
+    
+    // Search in city
+    const city = order.shipping_address?.city || ''
+    if (city.toLowerCase().includes(searchLower)) return true
+    
+    // Search in province
+    const province = order.shipping_address?.province || ''
+    if (province.toLowerCase().includes(searchLower)) return true
+    
+    // Search in postal code
+    const zipCode = order.shipping_address?.zip || ''
+    if (zipCode.toLowerCase().includes(searchLower)) return true
+    
+    return false
+  })
 
   const getFilteredOrdersByTab = () => {
+    // First apply search filter
+    let filtered = filteredOrders
+    
+    // Then apply status filter if it's not "all"
+    if (statusFilter !== 'all') {
+      switch (statusFilter) {
+        case 'new':
+          filtered = filtered.filter(o => o.parcel_status === 'Not sent')
+          break
+        case 'sent':
+          filtered = filtered.filter(o => o.parcel_status === 'Sent to Droppex')
+          break
+        case 'failed':
+          filtered = filtered.filter(o => o.parcel_status === 'Failed')
+          break
+      }
+    }
+    
+    // Finally apply tab filter
     switch (activeTab) {
       case 'new':
-        return filteredOrders.filter(o => o.parcel_status === 'Not sent')
+        return filtered.filter(o => o.parcel_status === 'Not sent')
       case 'sent':
-        return filteredOrders.filter(o => o.parcel_status === 'Sent to Droppex')
+        return filtered.filter(o => o.parcel_status === 'Sent to Droppex')
       case 'failed':
-        return filteredOrders.filter(o => o.parcel_status === 'Failed')
+        return filtered.filter(o => o.parcel_status === 'Failed')
       default:
-        return filteredOrders
+        return filtered
     }
   }
 
@@ -243,12 +249,9 @@ export function useDashboard() {
     selectedOrders,
     selectedOrder,
     sendingOrders,
-    droppexStatus,
-    statusLoading,
     shopifyStatus,
     activeTab,
     statusFilter,
-    debugInfo,
     showVerificationModal,
     ordersToSend,
     tabOrders,
@@ -264,8 +267,6 @@ export function useDashboard() {
 
     // Functions
     fetchOrders,
-    fetchDroppexStatus,
-    testConnection,
     handleSendToDroppex,
     handlePrepareForDroppex,
     handleRetryFailedOrder,

@@ -143,12 +143,49 @@ export function validateOrderForDroppex(order: Order): DroppexMappingValidation 
   const zipCode = order.shipping_address?.zip || ''
   if (!zipCode) {
     warnings.push('No postal code provided, using default (1000)')
+  } else {
+    // Validate postal code format to prevent wrong field mapping
+    const cleanZipCode = zipCode.toString().trim()
+    if (!/^\d{4,5}$/.test(cleanZipCode)) {
+      warnings.push(`Postal code format may be invalid: ${zipCode}`)
+    }
   }
   
-  // Province/State validation
+  // Province/State validation and governorate code mapping
   const province = order.shipping_address?.province || ''
   if (!province) {
     warnings.push('No province provided, using default (Tunis)')
+  }
+  
+  // Map province to governorate ID (you may need to adjust these mappings)
+  const getGovernorateId = (provinceName: string): string => {
+    const governorateMap: Record<string, string> = {
+      'Tunis': '1',
+      'Sousse': '2', 
+      'Monastir': '3',
+      'Mahdia': '4',
+      'Sfax': '5',
+      'Gabès': '6',
+      'Médenine': '7',
+      'Gafsa': '8',
+      'Tozeur': '9',
+      'Kébili': '10',
+      'Kairouan': '11',
+      'Kasserine': '12',
+      'Sidi Bouzid': '13',
+      'Zaghouan': '14',
+      'Nabeul': '15',
+      'Béja': '16',
+      'Jendouba': '17',
+      'Le Kef': '18',
+      'Siliana': '19',
+      'Bizerte': '20',
+      'Béni Arous': '21',
+      'Ariana': '22',
+      'Manouba': '23',
+      'Tataouine': '24'
+    }
+    return governorateMap[provinceName] || '1' // Default to Tunis
   }
   
   // Line items validation
@@ -156,17 +193,34 @@ export function validateOrderForDroppex(order: Order): DroppexMappingValidation 
     warnings.push('No line items found')
   }
   
+  // Get libelle from order name or first line item
+  const getLibelle = (): string => {
+    if (order.line_items && order.line_items.length > 0) {
+      const firstItem = order.line_items[0]
+      return firstItem.title || firstItem.name || order.name
+    }
+    return order.name
+  }
+  
+  // Get full address
+  const getFullAddress = (): string => {
+    const address1 = order.shipping_address?.address1 || ''
+    const address2 = order.shipping_address?.address2 || ''
+    return `${address1} ${address2}`.trim()
+  }
+  
   const mappedData = {
     action: 'add',
     tel_l: phone,
     nom_client: customerName,
-    gov_l: province || 'Tunis',
-    cod: zipCode || '1000',
-    libelle: `${city} ${province}`.trim() || 'Tunis',
-    nb_piece: (order.line_items?.length || 0).toString(),
-    adresse_l: address,
-    remarque: order.note || `Order: ${order.name}`,
-    tel2_l: phone,
+    gov_l: getGovernorateId(province),
+    cp_l: zipCode || '1000',  // Postal code field
+    cod: (order.total_price || 0).toFixed(2),  // Price field
+    libelle: getLibelle(),
+    nb_piece: (order.line_items?.length || 1).toString(),
+    adresse_l: getFullAddress(),
+    remarque: order.note || 'Standard delivery',
+    tel2_l: phone,  // Same as primary phone for now
     service: 'Livraison'
   }
   

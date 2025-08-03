@@ -26,7 +26,8 @@ export interface DroppexPackage {
   tel_l: string
   nom_client: string
   gov_l: string
-  cod: string
+  cp_l: string  // Postal code field
+  cod: string   // Price field (total_price)
   libelle: string
   nb_piece: string
   adresse_l: string
@@ -111,6 +112,18 @@ export function mapOrderToDroppexFormat(order: Order): DroppexPackage {
   if (validation.warnings.length > 0) {
     console.warn('Order validation warnings:', validation.warnings)
   }
+  
+  // Add detailed logging for debugging postal code and price issues
+  console.log('Droppex mapping debug:', {
+    orderId: order.id,
+    postalCode: order.shipping_address?.zip,
+    mappedPostalCode: validation.mappedData.cp_l,
+    price: order.total_price,
+    mappedPrice: validation.mappedData.cod,
+    customerName: validation.mappedData.nom_client,
+    address: validation.mappedData.adresse_l,
+    governorate: validation.mappedData.gov_l
+  })
   
   // Return the validated and mapped data
   return {

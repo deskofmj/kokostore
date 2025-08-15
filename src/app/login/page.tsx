@@ -15,7 +15,7 @@ export default function LoginPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { login, isLoading } = useAuth()
   const router = useRouter()
@@ -48,7 +48,7 @@ export default function LoginPage() {
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !isSubmitting) {
-      handleSubmit(e as any)
+      handleSubmit(e as React.FormEvent)
     }
   }
 

@@ -172,28 +172,28 @@ export function useDashboard() {
     if (customerName.toLowerCase().includes(searchLower)) return true
     
     // Search in shipping address name
-    if (order.shipping_address?.name?.toLowerCase().includes(searchLower)) return true
+    if ((order.shipping_address?.name as string)?.toLowerCase().includes(searchLower)) return true
     
     // Search in phone numbers
-    const customerPhone = order.customer?.phone || ''
-    const shippingPhone = order.shipping_address?.phone || ''
+    const customerPhone = (order.customer?.phone as string) || ''
+    const shippingPhone = (order.shipping_address?.phone as string) || ''
     if (customerPhone.toLowerCase().includes(searchLower) || 
         shippingPhone.toLowerCase().includes(searchLower)) return true
     
     // Search in address
-    const address = order.shipping_address?.address1 || ''
+    const address = (order.shipping_address?.address1 as string) || ''
     if (address.toLowerCase().includes(searchLower)) return true
     
     // Search in city
-    const city = order.shipping_address?.city || ''
+    const city = (order.shipping_address?.city as string) || ''
     if (city.toLowerCase().includes(searchLower)) return true
     
     // Search in province
-    const province = order.shipping_address?.province || ''
+    const province = (order.shipping_address?.province as string) || ''
     if (province.toLowerCase().includes(searchLower)) return true
     
     // Search in postal code
-    const zipCode = order.shipping_address?.zip || ''
+    const zipCode = (order.shipping_address?.zip as string) || ''
     if (zipCode.toLowerCase().includes(searchLower)) return true
     
     return false

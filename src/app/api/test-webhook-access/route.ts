@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   return NextResponse.json({ 
     success: true,
     message: 'Webhook endpoint is accessible without authentication',
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       receivedData: data,
       timestamp: new Date().toISOString()
     })
-  } catch (error) {
+  } catch {
     return NextResponse.json({ 
       success: false,
       error: 'Invalid JSON in request body',

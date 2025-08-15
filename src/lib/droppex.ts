@@ -69,7 +69,7 @@ export async function sendOrderToDroppex(order: Order): Promise<DroppexResponse>
     const data = await response.text()
     
     // Try to parse as JSON, but handle text responses too
-    let parsedData: any
+    let parsedData: Record<string, unknown>
     try {
       parsedData = JSON.parse(data)
     } catch {
@@ -80,16 +80,16 @@ export async function sendOrderToDroppex(order: Order): Promise<DroppexResponse>
     // Based on actual API response: {"reference": 61934246738, "url": "...", "message": "..."}
     const hasReference = !!parsedData.reference
     const hasCodeBarre = !!parsedData.code_barre
-    const hasSuccessMessage = parsedData.message?.toLowerCase().includes('success')
-    const hasError = parsedData.error || parsedData.message?.toLowerCase().includes('error')
+    const hasSuccessMessage = (parsedData.message as string)?.toLowerCase().includes('success')
+    const hasError = parsedData.error || (parsedData.message as string)?.toLowerCase().includes('error')
     const isSuccess = (hasReference || hasCodeBarre || hasSuccessMessage) && !hasError
 
     return {
       success: isSuccess,
-      tracking_number: parsedData.reference?.toString() || parsedData.code_barre,
-      code_barre: parsedData.reference?.toString() || parsedData.code_barre,
-      message: parsedData.message,
-      error_message: isSuccess ? undefined : parsedData.message || 'Unknown error'
+      tracking_number: (parsedData.reference?.toString() as string) || (parsedData.code_barre as string),
+      code_barre: (parsedData.reference?.toString() as string) || (parsedData.code_barre as string),
+      message: parsedData.message as string,
+      error_message: isSuccess ? undefined : (parsedData.message as string) || 'Unknown error'
     }
   } catch (error) {
     return {
@@ -156,7 +156,7 @@ export async function getDroppexPackage(codeBarre: string): Promise<DroppexRespo
 
     const data = await response.text()
     
-    let parsedData: any
+    let parsedData: Record<string, unknown>
     try {
       parsedData = JSON.parse(data)
     } catch {
@@ -200,7 +200,7 @@ export async function listDroppexPackages(): Promise<DroppexResponse> {
     })
 
     const data = await response.text()
-    let parsedData: any
+    let parsedData: Record<string, unknown>
     try {
       parsedData = JSON.parse(data)
     } catch {

@@ -110,9 +110,9 @@ export function OrderTable({
                 <TableCell>
                   <div>
                     <div className="font-medium text-gray-900">
-                      {order.customer?.first_name} {order.customer?.last_name}
+                      {(order.customer?.first_name as string) || ''} {(order.customer?.last_name as string) || ''}
                     </div>
-                    <div className="text-sm text-gray-500">{order.customer?.phone}</div>
+                    <div className="text-sm text-gray-500">{order.customer?.phone as string || 'N/A'}</div>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -247,7 +247,7 @@ function OrderDetails({ order }: { order: Order }) {
             <div>
               <p className="text-sm font-medium text-gray-500">Name</p>
               <p className="text-gray-900">
-                {order.customer?.first_name} {order.customer?.last_name}
+                {(order.customer?.first_name as string) || ''} {(order.customer?.last_name as string) || ''}
               </p>
             </div>
             <div>
@@ -257,7 +257,7 @@ function OrderDetails({ order }: { order: Order }) {
             <div>
               <p className="text-sm font-medium text-gray-500">Phone</p>
               <p className="text-gray-900">
-                {order.shipping_address?.phone || order.customer?.phone || 'N/A'}
+                {(order.shipping_address?.phone as string) || (order.customer?.phone as string) || 'N/A'}
               </p>
             </div>
           </div>
@@ -273,21 +273,21 @@ function OrderDetails({ order }: { order: Order }) {
         <div className="space-y-4">
           <div>
             <p className="text-sm font-medium text-gray-500">Address</p>
-            <p className="text-gray-900">{order.shipping_address?.address1 || 'N/A'}</p>
+            <p className="text-gray-900">{order.shipping_address?.address1 as string || 'N/A'}</p>
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500">City & Province</p>
             <p className="text-gray-900">
-              {order.shipping_address?.city}, {order.shipping_address?.province}
+              {order.shipping_address?.city as string || 'N/A'}, {order.shipping_address?.province as string || 'N/A'}
             </p>
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500">Postal Code</p>
-            <p className="text-gray-900">{order.shipping_address?.zip || 'N/A'}</p>
+            <p className="text-gray-900">{order.shipping_address?.zip as string || 'N/A'}</p>
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500">Country</p>
-            <p className="text-gray-900">{order.shipping_address?.country || 'Tunisia'}</p>
+            <p className="text-gray-900">{order.shipping_address?.country as string || 'Tunisia'}</p>
           </div>
         </div>
       </div>

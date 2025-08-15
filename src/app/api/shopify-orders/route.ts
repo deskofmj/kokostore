@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { fetchShopifyOrders, mapShopifyOrderToOrder } from '@/lib/shopify'
 import { getOrders, insertOrder } from '@/lib/supabase'
 
@@ -55,7 +55,7 @@ export async function GET() {
         newOrdersCount: 0,
         error: 'Shopify API error, showing existing orders only'
       })
-    } catch (dbError) {
+    } catch {
       return NextResponse.json(
         { error: 'Failed to fetch orders', orders: [] },
         { status: 500 }

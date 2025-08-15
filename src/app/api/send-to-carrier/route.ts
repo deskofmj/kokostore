@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
           
           
           if (droppexResponse.success) {
-            await updateOrderStatus(order.id, 'Sent to Droppex', droppexResponse)
+            await updateOrderStatus(order.id, 'Sent to Droppex', droppexResponse as unknown as Record<string, unknown>)
             // Clear the "Updated in Shopify" flag when order is sent to Droppex
             await clearUpdatedInShopifyFlag(order.id)
             results.push({
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
               trackingNumber: droppexResponse.tracking_number
             })
           } else {
-            await updateOrderStatus(order.id, 'Failed', droppexResponse)
+            await updateOrderStatus(order.id, 'Failed', droppexResponse as unknown as Record<string, unknown>)
             results.push({
               orderId: order.id,
               success: false,

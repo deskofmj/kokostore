@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { fetchShopifyOrders } from '@/lib/shopify'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const config = {
       SHOPIFY_DOMAIN: process.env.SHOPIFY_DOMAIN || 'NOT_SET',
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Test Shopify API connection
-    let shopifyTest: any = { success: false, error: 'Not tested' }
+    let shopifyTest: Record<string, unknown> = { success: false, error: 'Not tested' }
     try {
       const orders = await fetchShopifyOrders()
       shopifyTest = { 

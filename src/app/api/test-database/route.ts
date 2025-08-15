@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getOrders, insertOrder } from '@/lib/supabase'
 import { mapShopifyOrderToOrder } from '@/lib/shopify'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Test database connection by fetching orders
     const orders = await getOrders()

@@ -6,22 +6,22 @@ export interface Order {
   email: string
   created_at: string
   total_price: number
-  line_items: any[]
-  shipping_address: any
-  billing_address: any
+  line_items: Record<string, unknown>[]
+  shipping_address: Record<string, unknown> | null
+  billing_address: Record<string, unknown> | null
   tags: string
   fulfillment_status: string
   financial_status: string
   note: string
-  customer: any
+  customer: Record<string, unknown> | null
   parcel_status: 'Not sent' | 'Sent to Droppex' | 'Failed'
-  droppex_response?: any
+  droppex_response?: Record<string, unknown> | null
   created_at_db?: string
   updated_at?: string
   updated_in_shopify?: boolean
   // Additional fields for cross-platform compatibility
-  raw?: any
-  shop_domain?: string
+  raw?: Record<string, unknown> | null
+  shop_domain?: string | null
 }
 
 // Lazy initialization of Supabase client
@@ -55,7 +55,7 @@ export async function getOrders() {
   }
 
   // Map the database data to the expected Order interface
-  const mappedData = (data || []).map((item: any) => ({
+  const mappedData = (data || []).map((item: Record<string, unknown>) => ({
     id: item.id,
     name: item.name || `Order #${item.id}`,
     email: item.email || '',
@@ -89,14 +89,14 @@ export async function getOrders() {
   return mappedData as Order[]
 }
 
-export async function updateOrderStatus(orderId: number, status: Order['parcel_status'], droppexResponse?: any) {
+export async function updateOrderStatus(orderId: number, status: Order['parcel_status'], droppexResponse?: Record<string, unknown>) {
   const supabase = getSupabaseClient()
   
   const { error } = await supabase
     .from('salmacollection')
     .update({ 
       parcel_status: status,
-      droppex_response: droppexResponse 
+      droppex_response: droppexResponse || null
     })
     .eq('id', orderId)
 

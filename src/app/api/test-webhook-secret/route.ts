@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get('x-shopify-hmac-sha256')
     const webhookSecret = process.env.SHOPIFY_WEBHOOK_SECRET
 
-    const result: any = {
+    const result: Record<string, unknown> = {
       bodyLength: body.length,
       signaturePresent: !!signature,
       webhookSecretPresent: !!webhookSecret,

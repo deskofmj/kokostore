@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 
 // Droppex API Configuration
 const DROPPEX_CONFIG = {
@@ -15,7 +14,7 @@ const DROPPEX_CONFIG = {
   }
 }
 
-async function testDroppexConnection(config: any, envName: string) {
+async function testDroppexConnection(config: Record<string, string>, envName: string) {
   try {
     const formData = new URLSearchParams({
       action: 'list',
@@ -32,7 +31,7 @@ async function testDroppexConnection(config: any, envName: string) {
     })
 
     const data = await response.text()
-    let parsedData: any
+    let parsedData: Record<string, unknown>
     try {
       parsedData = JSON.parse(data)
     } catch {

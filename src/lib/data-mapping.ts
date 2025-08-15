@@ -2,7 +2,7 @@ import { Order } from './supabase'
 
 export interface DataMappingResult {
   success: boolean
-  mappedData: any
+  mappedData: Record<string, unknown>
   errors: string[]
   warnings: string[]
 }
@@ -11,13 +11,13 @@ export interface DroppexMappingValidation {
   isValid: boolean
   errors: string[]
   warnings: string[]
-  mappedData: any
+  mappedData: Record<string, unknown>
 }
 
 /**
  * Validates and maps Shopify order data to our internal format
  */
-export function validateShopifyToSupabase(shopifyOrder: any): DataMappingResult {
+export function validateShopifyToSupabase(shopifyOrder: Record<string, unknown>): DataMappingResult {
   const errors: string[] = []
   const warnings: string[] = []
   
@@ -37,7 +37,7 @@ export function validateShopifyToSupabase(shopifyOrder: any): DataMappingResult 
   // Price validation
   let totalPrice = 0
   if (shopifyOrder.total_price) {
-    const price = parseFloat(shopifyOrder.total_price)
+    const price = parseFloat(shopifyOrder.total_price as string)
     if (isNaN(price)) {
       errors.push('Invalid total_price format')
     } else {
@@ -48,7 +48,7 @@ export function validateShopifyToSupabase(shopifyOrder: any): DataMappingResult 
   }
   
   // Shipping address validation
-  const shippingAddress = shopifyOrder.shipping_address || {}
+  const shippingAddress = shopifyOrder.shipping_address as Record<string, unknown> || {}
   if (!shippingAddress.address1) {
     warnings.push('No shipping address provided')
   }
@@ -61,12 +61,12 @@ export function validateShopifyToSupabase(shopifyOrder: any): DataMappingResult 
     warnings.push('No postal code provided')
   }
   
-  if (!shippingAddress.phone && !shopifyOrder.customer?.phone) {
+  if (!shippingAddress.phone && !(shopifyOrder.customer as Record<string, unknown>)?.phone) {
     warnings.push('No phone number provided')
   }
   
   // Customer validation
-  const customer = shopifyOrder.customer || {}
+  const customer = shopifyOrder.customer as Record<string, unknown> || {}
   if (!customer.first_name && !customer.last_name && !shippingAddress.name) {
     warnings.push('No customer name provided')
   }
@@ -196,8 +196,8 @@ export function validateOrderForDroppex(order: Order): DroppexMappingValidation 
   // Get libelle from order name or first line item
   const getLibelle = (): string => {
     if (order.line_items && order.line_items.length > 0) {
-      const firstItem = order.line_items[0]
-      return firstItem.title || firstItem.name || order.name
+      const firstItem = order.line_items[0] as Record<string, unknown>
+      return (firstItem.title as string) || (firstItem.name as string) || order.name
     }
     return order.name
   }
@@ -213,7 +213,7 @@ export function validateOrderForDroppex(order: Order): DroppexMappingValidation 
     action: 'add',
     tel_l: phone,
     nom_client: customerName,
-    gov_l: getGovernorateId(province),
+    gov_l: getGovernorateId(province as string),
     cp_l: zipCode || '1000',  // Postal code field
     cod: (order.total_price || 0).toFixed(2),  // Price field
     libelle: getLibelle(),

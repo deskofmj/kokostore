@@ -1,6 +1,5 @@
 'use client'
 
-import { Badge } from '@/components/ui/badge'
 import { AlertCircle, CheckCircle, XCircle } from 'lucide-react'
 import { getOrderDataQuality } from '@/lib/data-mapping'
 import { Order } from '@/lib/supabase'

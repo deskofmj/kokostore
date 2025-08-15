@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const config = {
       SHOPIFY_DOMAIN: process.env.SHOPIFY_DOMAIN || 'NOT_SET',

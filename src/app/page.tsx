@@ -1,7 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/components/auth-provider'
+
 import { ProtectedRoute } from '@/components/protected-route'
 import { UserProfile } from '@/components/user-profile'
 import { VerificationModal } from '@/components/verification-modal'
@@ -12,14 +11,7 @@ import { Package, Truck, AlertCircle } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 
 export default function Dashboard() {
-  const { logout } = useAuth()
-  const router = useRouter()
   const dashboard = useDashboard()
-
-  const handleLogout = () => {
-    logout()
-    router.push('/login')
-  }
 
   return (
     <ProtectedRoute>

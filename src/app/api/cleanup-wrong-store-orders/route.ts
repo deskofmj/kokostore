@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     const supabase = getSupabaseClient()
     
@@ -19,11 +19,11 @@ export async function POST(request: NextRequest) {
     }
 
     const wrongStoreOrders = ordersToDelete?.filter(order => {
-      const raw = order.raw as any
+      const raw = order.raw as Record<string, unknown>
       return raw && (
-        raw.referring_site?.includes('nnclothingstore') ||
-        raw.landing_site?.includes('nnclothingstore') ||
-        raw.source_url?.includes('nnclothingstore')
+        (typeof raw.referring_site === 'string' && raw.referring_site.includes('nnclothingstore')) ||
+        (typeof raw.landing_site === 'string' && raw.landing_site.includes('nnclothingstore')) ||
+        (typeof raw.source_url === 'string' && raw.source_url.includes('nnclothingstore'))
       )
     }) || []
 

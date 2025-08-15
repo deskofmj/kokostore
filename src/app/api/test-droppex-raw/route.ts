@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     const data = await response.text()
     console.log(`Raw Droppex response (${response.status}):`, data)
     
-    let parsedData: any
+    let parsedData: Record<string, unknown>
     try {
       parsedData = JSON.parse(data)
     } catch {

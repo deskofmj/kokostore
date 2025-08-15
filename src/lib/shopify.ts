@@ -10,14 +10,14 @@ export interface ShopifyOrder {
   email: string
   created_at: string
   total_price: string
-  line_items: any[]
-  shipping_address: any
-  billing_address: any
+  line_items: Record<string, unknown>[]
+  shipping_address: Record<string, unknown> | null
+  billing_address: Record<string, unknown> | null
   tags: string
   fulfillment_status: string
   financial_status: string
   note: string
-  customer: any
+  customer: Record<string, unknown> | null
 }
 
 export async function fetchShopifyOrders(): Promise<ShopifyOrder[]> {
@@ -67,7 +67,7 @@ export async function verifyWebhookSignature(
   signature: string,
   secret: string
 ): Promise<boolean> {
-  const crypto = require('crypto')
+  const crypto = await import('crypto')
   const hmac = crypto.createHmac('sha256', secret)
   hmac.update(body, 'utf8')
   const calculatedSignature = 'sha256=' + hmac.digest('hex')

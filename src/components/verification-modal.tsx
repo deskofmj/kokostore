@@ -173,7 +173,7 @@ export function VerificationModal({
     }
     
     // Email validation - use order.email as fallback
-    const email = customer?.email || order.email
+    const email = (customer?.email as string) || order.email
     if (!email?.trim()) {
       errors.push('Email is required')
     } else {
@@ -185,7 +185,7 @@ export function VerificationModal({
     }
     
     // Phone validation - be more flexible
-    const phone = customer?.phone || shipping?.phone || order.customer?.phone
+    const phone = (customer?.phone as string) || (shipping?.phone as string) || (order.customer?.phone as string)
     if (!phone?.trim()) {
       errors.push('Phone is required')
     } else {
@@ -197,24 +197,24 @@ export function VerificationModal({
     }
     
     // Shipping validation - be more flexible
-    const address = shipping?.address1 || order.shipping_address?.address1
+    const address = (shipping?.address1 as string) || (order.shipping_address?.address1 as string)
     if (!address?.trim()) {
       errors.push('Address is required')
     }
     
-    const city = shipping?.city || order.shipping_address?.city
+    const city = (shipping?.city as string) || (order.shipping_address?.city as string)
     if (!city?.trim()) {
       errors.push('City is required')
     }
     
     // Province validation - be more flexible and provide default
-    const province = shipping?.province || order.shipping_address?.province
+    const province = (shipping?.province as string) || (order.shipping_address?.province as string)
     if (!province?.trim()) {
       // Don't error, just warn - we'll use default
       console.warn(`No province provided for order ${order.id}, will use default`)
     }
     
-    const zipCode = shipping?.zip || order.shipping_address?.zip
+    const zipCode = (shipping?.zip as string) || (order.shipping_address?.zip as string)
     if (!zipCode?.trim()) {
       errors.push('ZIP code is required')
     }
@@ -338,21 +338,21 @@ export function VerificationModal({
               const orderErrors = errors[order.id] || []
               
               // Better customer name handling
-              const customerName = shipping?.name || 
-                                 `${customer?.first_name || ''} ${customer?.last_name || ''}`.trim() ||
+              const customerName = (shipping?.name as string) || 
+                                 `${(customer?.first_name as string) || ''} ${(customer?.last_name as string) || ''}`.trim() ||
                                  order.email // Use email as fallback
               
               // Better email handling
-              const email = customer?.email || order.email
+              const email = (customer?.email as string) || order.email
               
               // Better phone handling
-              const phone = customer?.phone || shipping?.phone || order.customer?.phone
+              const phone = (customer?.phone as string) || (shipping?.phone as string) || (order.customer?.phone as string)
               
               // Better address handling
-              const address = shipping?.address1 || order.shipping_address?.address1
-              const city = shipping?.city || order.shipping_address?.city
-              const province = shipping?.province || order.shipping_address?.province
-              const zipCode = shipping?.zip || order.shipping_address?.zip
+              const address = (shipping?.address1 as string) || (order.shipping_address?.address1 as string)
+              const city = (shipping?.city as string) || (order.shipping_address?.city as string)
+              const province = (shipping?.province as string) || (order.shipping_address?.province as string)
+              const zipCode = (shipping?.zip as string) || (order.shipping_address?.zip as string)
 
               return (
                 <div key={order.id} className="border rounded-lg p-4 space-y-4">

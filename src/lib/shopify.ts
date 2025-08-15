@@ -1,9 +1,6 @@
 import { Order } from './supabase'
 
-// Only validate at runtime, not build time
-const SHOPIFY_DOMAIN = process.env.SHOPIFY_DOMAIN || ''
-const SHOPIFY_ACCESS_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN || ''
-
+// Webhook-only mode - no API access token needed
 export interface ShopifyOrder {
   id: number
   name: string
@@ -20,30 +17,10 @@ export interface ShopifyOrder {
   customer: Record<string, unknown> | null
 }
 
-export async function fetchShopifyOrders(): Promise<ShopifyOrder[]> {
-  // Validate environment at runtime
-  if (!process.env.SHOPIFY_DOMAIN || !process.env.SHOPIFY_ACCESS_TOKEN) {
-    throw new Error('SHOPIFY_DOMAIN and SHOPIFY_ACCESS_TOKEN environment variables are required')
-  }
-
-  const response = await fetch(
-    `https://${SHOPIFY_DOMAIN}/admin/api/2023-10/orders.json?status=any&limit=250`,
-    {
-      headers: {
-        'X-Shopify-Access-Token': SHOPIFY_ACCESS_TOKEN,
-        'Content-Type': 'application/json',
-      },
-    }
-  )
-
-  if (!response.ok) {
-    throw new Error(`Shopify API error: ${response.status} ${response.statusText}`)
-  }
-
-  const data = await response.json()
-  return data.orders
-}
-
+/**
+ * Maps Shopify webhook order data to our database format
+ * This function processes data received from Shopify webhooks only
+ */
 export function mapShopifyOrderToOrder(shopifyOrder: ShopifyOrder): Omit<Order, 'parcel_status' | 'created_at_db'> {
   return {
     id: shopifyOrder.id,
@@ -62,6 +39,10 @@ export function mapShopifyOrderToOrder(shopifyOrder: ShopifyOrder): Omit<Order, 
   }
 }
 
+/**
+ * Verifies Shopify webhook signature using webhook secret
+ * This is the only authentication method we use - no API access token needed
+ */
 export async function verifyWebhookSignature(
   body: string,
   signature: string,

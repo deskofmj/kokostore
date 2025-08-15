@@ -56,6 +56,13 @@ export async function POST(request: NextRequest) {
     console.log('Order Note:', shopifyOrder.note)
     console.log('Customer Name:', shopifyOrder.customer?.first_name, shopifyOrder.customer?.last_name)
     console.log('Shipping Address:', shopifyOrder.shipping_address?.address1)
+    
+    // Log detailed customer data for debugging
+    console.log('=== DETAILED CUSTOMER DATA ===')
+    console.log('Customer object:', JSON.stringify(shopifyOrder.customer, null, 2))
+    console.log('Shipping address:', JSON.stringify(shopifyOrder.shipping_address, null, 2))
+    console.log('Billing address:', JSON.stringify(shopifyOrder.billing_address, null, 2))
+    console.log('=== END CUSTOMER DATA ===')
 
     // Check if order already exists
     console.log('Fetching existing orders...')

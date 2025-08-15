@@ -43,9 +43,7 @@ npm install
 Create a `.env.local` file in the root directory:
 
 ```bash
-# Shopify
-SHOPIFY_DOMAIN=your-store.myshopify.com
-SHOPIFY_ACCESS_TOKEN=your_access_token
+# Shopify (Webhook-Only Mode)
 SHOPIFY_WEBHOOK_SECRET=your_webhook_secret
 
 # Supabase
@@ -88,15 +86,16 @@ CREATE TABLE orders (
 );
 ```
 
-### 4. Shopify Setup
+### 4. Shopify Setup (Webhook-Only)
 
-1. Create a private app in your Shopify admin
-2. Enable the following API permissions:
-   - Read orders
-   - Read customers
-   - Read products
-3. Copy the API key and secret to your environment variables
-4. Set up webhooks for order creation/updates pointing to `/api/shopify-webhook`
+1. **Webhook Configuration Only** - No API access token needed
+2. Set up webhooks in your Shopify admin:
+   - Go to **Settings** → **Notifications** → **Webhooks**
+   - Add webhook for **Order creation** pointing to `/api/shopify-webhook`
+   - Add webhook for **Order edit** pointing to `/api/shopify-webhook`
+   - Format: JSON, API version: 2024-10 (recommended)
+3. Copy the webhook secret to your environment variables
+4. **No API permissions required** - we only use webhooks for data
 
 ### 5. Development
 

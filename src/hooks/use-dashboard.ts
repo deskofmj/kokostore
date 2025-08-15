@@ -21,6 +21,8 @@ export function useDashboard() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [showVerificationModal, setShowVerificationModal] = useState(false)
   const [ordersToSend, setOrdersToSend] = useState<Order[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage] = useState(10)
 
   // Initialize data
   useEffect(() => {
@@ -240,6 +242,17 @@ export function useDashboard() {
   }
 
   const tabOrders = getFilteredOrdersByTab()
+  
+  // Pagination logic
+  const totalPages = Math.ceil(tabOrders.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedOrders = tabOrders.slice(startIndex, endIndex)
+  
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, statusFilter, activeTab])
 
   return {
     // State
@@ -254,8 +267,11 @@ export function useDashboard() {
     statusFilter,
     showVerificationModal,
     ordersToSend,
-    tabOrders,
+    tabOrders: paginatedOrders,
     orderStats,
+    currentPage,
+    totalPages,
+    itemsPerPage,
 
     // Setters
     setSearchTerm,
@@ -264,6 +280,7 @@ export function useDashboard() {
     setActiveTab,
     setStatusFilter,
     setShowVerificationModal,
+    setCurrentPage,
 
     // Functions
     fetchOrders,

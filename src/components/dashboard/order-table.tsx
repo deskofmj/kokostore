@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Pagination } from '@/components/ui/pagination'
 import { DataQualityIndicator } from './data-quality-indicator'
 import { Eye, RotateCcw, Send, AlertCircle, Package, Truck, XCircle } from 'lucide-react'
 
@@ -55,6 +56,9 @@ interface OrderTableProps {
   onRevertOrder: (order: Order) => void
   onSendOrder: (orderId: number) => void
   sendingOrders: boolean
+  currentPage?: number
+  totalPages?: number
+  onPageChange?: (page: number) => void
 }
 
 export function OrderTable({
@@ -66,7 +70,10 @@ export function OrderTable({
   onRetryOrder,
   onRevertOrder,
   onSendOrder,
-  sendingOrders
+  sendingOrders,
+  currentPage,
+  totalPages,
+  onPageChange
 }: OrderTableProps) {
   const getStatusBadge = (status: Order['parcel_status']) => {
     const variants = {
@@ -80,7 +87,7 @@ export function OrderTable({
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl shadow-lg border-0 p-8">
+      <div className="bg-white rounded-2xl border-0 p-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-2 text-gray-600">Loading orders...</p>
@@ -91,7 +98,7 @@ export function OrderTable({
 
   if (orders.length === 0) {
     return (
-      <div className="bg-white rounded-2xl shadow-lg border-0 p-8">
+      <div className="bg-white rounded-2xl border-0 p-8">
         <div className="text-center">
           <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
@@ -102,7 +109,7 @@ export function OrderTable({
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden">
+    <div className="bg-white rounded-2xl border-0 overflow-hidden">
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
@@ -235,6 +242,17 @@ export function OrderTable({
           </TableBody>
         </Table>
       </div>
+      
+      {/* Pagination */}
+      {totalPages && totalPages > 1 && onPageChange && (
+        <div className="border-t border-gray-100 px-6 py-4">
+          <Pagination
+            currentPage={currentPage || 1}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+          />
+        </div>
+      )}
     </div>
   )
 }

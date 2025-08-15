@@ -27,7 +27,7 @@ export function DataQualityIndicator({ order, showDetails = false }: DataQuality
         <XCircle className="h-3 w-3 text-red-500" />
         <span className="text-xs text-red-600">Issues</span>
         {showDetails && (
-          <div className="absolute z-10 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-3">
+          <div className="absolute z-10 mt-2 w-64 bg-white border border-gray-200 rounded-lg p-3">
             <div className="text-xs font-medium text-gray-900 mb-2">Data Quality Issues:</div>
             <ul className="space-y-1">
               {quality.issues.map((issue, index) => (
@@ -55,7 +55,7 @@ export function DataQualityIndicator({ order, showDetails = false }: DataQuality
         <AlertCircle className="h-3 w-3 text-yellow-500" />
         <span className="text-xs text-yellow-600">Warnings</span>
         {showDetails && (
-          <div className="absolute z-10 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-3">
+          <div className="absolute z-10 mt-2 w-64 bg-white border border-gray-200 rounded-lg p-3">
             <div className="text-xs font-medium text-gray-900 mb-2">Data Quality Warnings:</div>
             <ul className="space-y-1">
               {quality.warnings.map((warning, index) => (

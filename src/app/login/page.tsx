@@ -65,22 +65,24 @@ export default function LoginPage() {
 
   return (
     <AuthRedirect>
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-        <div className="w-full max-w-md">
-          <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-          <CardHeader className="space-y-1 pb-4">
-            <div className="flex items-center justify-center mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <Lock className="w-6 h-6 text-white" />
+      <div className="min-h-screen flex">
+        {/* Left side - Login Form */}
+        <div className="flex-1 flex items-center justify-center p-8 bg-white">
+          <div className="w-full max-w-md">
+            <Card className="border-0 bg-white">
+              <CardHeader className="space-y-1 pb-6">
+                              <div className="flex items-center justify-center mb-6">
+                <div>
+                  <img src="/logo.svg" alt="Salma Collection" className="h-8 w-8" />
+                </div>
               </div>
-            </div>
-            <CardTitle className="text-2xl font-bold text-center text-slate-900">
-              Welcome Back
-            </CardTitle>
-            <CardDescription className="text-center text-slate-600">
-              Sign in to your Shopify Droppex Fulfillment account
-            </CardDescription>
-          </CardHeader>
+                <CardTitle className="text-2xl font-bold text-center text-slate-900">
+                  Welcome to Salma Collection
+                </CardTitle>
+                <CardDescription className="text-center text-slate-600">
+                  Sign in to your order management system
+                </CardDescription>
+              </CardHeader>
           
           <CardContent className="space-y-4">
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -141,7 +143,7 @@ export default function LoginPage() {
             <Button
               type="submit"
                 disabled={isSubmitting || !username || !password}
-                className="w-full h-11 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="w-full h-11 bg-black hover:bg-gray-800 text-white font-medium rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {isSubmitting ? (
                   <>
@@ -159,13 +161,25 @@ export default function LoginPage() {
             <Separator />
             <div className="text-center">
               <p className="text-xs text-slate-500">
-                Secure authentication powered by Shopify Droppex
+                Secure authentication powered by Salma Collection
               </p>
-          </div>
+            </div>
           </CardFooter>
         </Card>
       </div>
     </div>
-    </AuthRedirect>
+    
+    {/* Right side - Background Image */}
+    <div className="hidden lg:flex lg:w-1/2 relative">
+      <div 
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage: `url('/compressed-8F7A9947-Modifier copie.webp')`
+        }}
+      />
+      <div className="absolute inset-0 bg-black/10" />
+    </div>
+  </div>
+  </AuthRedirect>
   )
 } 

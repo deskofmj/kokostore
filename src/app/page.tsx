@@ -17,16 +17,18 @@ export default function Dashboard() {
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 shadow-sm">
+        <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-6 py-4">
             <div className="flex justify-between items-center">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Package className="h-6 w-6 text-blue-600" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-semibold text-gray-900">Order Fulfillment</h1>
-                  <p className="text-sm text-gray-500">Shopify • Droppex</p>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-3">
+                  <div>
+                    <img src="/logo.svg" alt="Salma Collection" className="h-7 w-7" />
+                  </div>
+                  <div>
+                    <h1 className="text-xl font-bold text-gray-900">Salma Collection</h1>
+                    <p className="text-sm text-gray-500 font-medium">Order Management System</p>
+                  </div>
                 </div>
               </div>
               
@@ -51,28 +53,28 @@ export default function Dashboard() {
           />
 
           {/* Orders Table */}
-          <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden">
+          <div className="bg-white rounded-2xl border-0 overflow-hidden">
             <Tabs value={dashboard.activeTab} onValueChange={dashboard.setActiveTab} className="w-full">
               <div className="border-b border-gray-100">
                 <div className="px-8 py-6">
                   <TabsList className="grid w-full grid-cols-3 bg-gray-50 p-1 rounded-xl">
                     <TabsTrigger 
                       value="new" 
-                      className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg"
+                      className="flex items-center gap-2 data-[state=active]:bg-white rounded-lg"
                     >
                       <Package className="h-4 w-4" />
                       New Orders ({dashboard.orderStats.notSent})
                     </TabsTrigger>
                     <TabsTrigger 
                       value="sent" 
-                      className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg"
+                      className="flex items-center gap-2 data-[state=active]:bg-white rounded-lg"
                     >
                       <Truck className="h-4 w-4" />
                       Sent Orders ({dashboard.orderStats.sent})
                     </TabsTrigger>
                     <TabsTrigger 
                       value="failed" 
-                      className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg"
+                      className="flex items-center gap-2 data-[state=active]:bg-white rounded-lg"
                     >
                       <AlertCircle className="h-4 w-4" />
                       Failed Orders ({dashboard.orderStats.failed})
@@ -92,6 +94,9 @@ export default function Dashboard() {
                   onRevertOrder={dashboard.handleRevertOrder}
                   onSendOrder={dashboard.handleSendOrder}
                   sendingOrders={dashboard.sendingOrders}
+                  currentPage={dashboard.currentPage}
+                  totalPages={dashboard.totalPages}
+                  onPageChange={dashboard.setCurrentPage}
                 />
               </TabsContent>
               
@@ -106,6 +111,9 @@ export default function Dashboard() {
                   onRevertOrder={dashboard.handleRevertOrder}
                   onSendOrder={dashboard.handleSendOrder}
                   sendingOrders={dashboard.sendingOrders}
+                  currentPage={dashboard.currentPage}
+                  totalPages={dashboard.totalPages}
+                  onPageChange={dashboard.setCurrentPage}
                 />
               </TabsContent>
               
@@ -120,6 +128,9 @@ export default function Dashboard() {
                   onRevertOrder={dashboard.handleRevertOrder}
                   onSendOrder={dashboard.handleSendOrder}
                   sendingOrders={dashboard.sendingOrders}
+                  currentPage={dashboard.currentPage}
+                  totalPages={dashboard.totalPages}
+                  onPageChange={dashboard.setCurrentPage}
                 />
               </TabsContent>
             </Tabs>
@@ -137,20 +148,37 @@ export default function Dashboard() {
 
         {/* Footer */}
         <footer className="bg-white border-t border-gray-200 mt-12">
-          <div className="max-w-7xl mx-auto px-6 py-4">
-            <div className="flex justify-center items-center">
-              <p className="text-sm text-gray-500">
-                © 2025{' '}
+          <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+              {/* Left side - Brand */}
+              <div className="flex items-center space-x-3">
+                <div>
+                  <img src="/logo.svg" alt="Salma Collection" className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">Salma Collection</h3>
+                  <p className="text-sm text-gray-500">Professional Order Management</p>
+                </div>
+              </div>
+              
+              {/* Center - Copyright */}
+              <div className="text-center">
+                <p className="text-sm text-gray-500">
+                  © 2025 Salma Collection. All rights reserved.
+                </p>
+              </div>
+              
+              {/* Right side - Links */}
+              <div className="flex items-center space-x-6">
                 <a 
                   href="https://www.deskofmj.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                  className="text-sm text-gray-500 hover:text-black font-medium transition-colors"
                 >
-                  Desk of Mj LTD
+                  Powered by Desk of Mj
                 </a>
-                . All rights reserved.
-              </p>
+              </div>
             </div>
           </div>
         </footer>

@@ -25,7 +25,7 @@ export function SearchFilters({
   sendingOrders
 }: SearchFiltersProps) {
   return (
-    <div className="bg-white rounded-2xl shadow-lg border-0 p-6 mb-6">
+    <div className="bg-white rounded-2xl border-0 p-6 mb-6">
       <div className="flex flex-col lg:flex-row gap-4">
         <div className="flex-1">
           <div className="relative">

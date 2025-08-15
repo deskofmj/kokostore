@@ -51,6 +51,6 @@ export async function verifyWebhookSignature(
   const crypto = await import('crypto')
   const hmac = crypto.createHmac('sha256', secret)
   hmac.update(body, 'utf8')
-  const calculatedSignature = 'sha256=' + hmac.digest('hex')
+  const calculatedSignature = hmac.digest('base64')
   return signature === calculatedSignature
 } 

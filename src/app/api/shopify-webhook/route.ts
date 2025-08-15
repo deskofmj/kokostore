@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     const crypto = await import('crypto')
     const hmac = crypto.createHmac('sha256', webhookSecret)
     hmac.update(body, 'utf8')
-    const calculatedSignature = 'sha256=' + hmac.digest('hex')
+    const calculatedSignature = hmac.digest('base64')
     
     console.log('Received signature:', signature)
     console.log('Calculated signature:', calculatedSignature)

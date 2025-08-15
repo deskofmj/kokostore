@@ -9,6 +9,42 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { DataQualityIndicator } from './data-quality-indicator'
 import { Eye, RotateCcw, Send, AlertCircle, Package, Truck, XCircle } from 'lucide-react'
 
+// Helper function to get the best available customer name
+function getCustomerName(order: Order): string {
+  // Try shipping address name first
+  if (order.shipping_address?.name) {
+    return order.shipping_address.name as string
+  }
+  
+  // Try customer first_name + last_name
+  const firstName = order.customer?.first_name as string || ''
+  const lastName = order.customer?.last_name as string || ''
+  const fullName = `${firstName} ${lastName}`.trim()
+  if (fullName) {
+    return fullName
+  }
+  
+  // Try email as fallback
+  if (order.email) {
+    return order.email
+  }
+  
+  // Try order name as last resort (only if it's meaningful)
+  if (order.name && !order.name.startsWith('#')) {
+    return order.name
+  }
+  
+  // If we have no meaningful customer information, show N/A
+  return 'N/A'
+}
+
+// Helper function to get the best available phone number
+function getCustomerPhone(order: Order): string {
+  return (order.shipping_address?.phone as string) || 
+         (order.customer?.phone as string) || 
+         'N/A'
+}
+
 interface OrderTableProps {
   orders: Order[]
   loading: boolean
@@ -110,9 +146,11 @@ export function OrderTable({
                 <TableCell>
                   <div>
                     <div className="font-medium text-gray-900">
-                      {(order.customer?.first_name as string) || ''} {(order.customer?.last_name as string) || ''}
+                      {getCustomerName(order)}
                     </div>
-                    <div className="text-sm text-gray-500">{order.customer?.phone as string || 'N/A'}</div>
+                    <div className="text-sm text-gray-500">
+                      {getCustomerPhone(order)}
+                    </div>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -247,7 +285,7 @@ function OrderDetails({ order }: { order: Order }) {
             <div>
               <p className="text-sm font-medium text-gray-500">Name</p>
               <p className="text-gray-900">
-                {(order.customer?.first_name as string) || ''} {(order.customer?.last_name as string) || ''}
+                {getCustomerName(order)}
               </p>
             </div>
             <div>
@@ -257,7 +295,7 @@ function OrderDetails({ order }: { order: Order }) {
             <div>
               <p className="text-sm font-medium text-gray-500">Phone</p>
               <p className="text-gray-900">
-                {(order.shipping_address?.phone as string) || (order.customer?.phone as string) || 'N/A'}
+                {getCustomerPhone(order)}
               </p>
             </div>
           </div>

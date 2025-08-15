@@ -35,16 +35,26 @@ export async function POST(request: NextRequest) {
 
     // Verify webhook signature
     console.log('Verifying signature...')
-    const isValid = await verifyWebhookSignature(body, signature, webhookSecret)
-    console.log('Signature valid:', isValid)
     
-    if (!isValid) {
+    // Calculate the expected signature
+    const crypto = await import('crypto')
+    const hmac = crypto.createHmac('sha256', webhookSecret)
+    hmac.update(body, 'utf8')
+    const calculatedSignature = 'sha256=' + hmac.digest('hex')
+    
+    console.log('Received signature:', signature)
+    console.log('Calculated signature:', calculatedSignature)
+    console.log('Signatures match:', signature === calculatedSignature)
+    
+    if (signature !== calculatedSignature) {
       console.log('ERROR: Invalid webhook signature')
       return NextResponse.json(
         { error: 'Invalid webhook signature' },
         { status: 401 }
       )
     }
+    
+    console.log('✅ Signature verification successful')
 
     console.log('Parsing JSON body...')
     const data = JSON.parse(body)

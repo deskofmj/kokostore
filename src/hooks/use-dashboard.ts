@@ -167,12 +167,12 @@ export function useDashboard() {
     // Search in email
     if (order.email?.toLowerCase().includes(searchLower)) return true
     
-    // Search in customer name
-    const customerName = `${order.customer?.first_name || ''} ${order.customer?.last_name || ''}`.trim()
+    // Search in customer name (using same logic as display)
+    const customerName = (order.shipping_address?.name as string) || 
+                        `${order.customer?.first_name || ''} ${order.customer?.last_name || ''}`.trim() ||
+                        order.email ||
+                        (order.name && !order.name.startsWith('#') ? order.name : '')
     if (customerName.toLowerCase().includes(searchLower)) return true
-    
-    // Search in shipping address name
-    if ((order.shipping_address?.name as string)?.toLowerCase().includes(searchLower)) return true
     
     // Search in phone numbers
     const customerPhone = (order.customer?.phone as string) || ''

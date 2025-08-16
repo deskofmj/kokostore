@@ -15,6 +15,26 @@ export const metadata: Metadata = {
   icons: {
     icon: '/Favicon.png',
   },
+  openGraph: {
+    title: 'Salma Collection - Order Management',
+    description: 'Professional order fulfillment and management system for Salma Collection. Streamline your Shopify orders, track shipments, and manage customer deliveries with our integrated Droppex fulfillment platform.',
+    images: [
+      {
+        url: '/compressed-opengraph.webp',
+        width: 1200,
+        height: 630,
+        alt: 'Salma Collection Order Management System',
+      },
+    ],
+    type: 'website',
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Salma Collection - Order Management',
+    description: 'Professional order fulfillment and management system for Salma Collection. Streamline your Shopify orders, track shipments, and manage customer deliveries with our integrated Droppex fulfillment platform.',
+    images: ['/compressed-opengraph.webp'],
+  },
 }
 
 export default function RootLayout({

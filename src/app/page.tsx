@@ -7,11 +7,14 @@ import { VerificationModal } from '@/components/verification-modal'
 import { SearchFilters } from '@/components/dashboard/search-filters'
 import { OrderTable } from '@/components/dashboard/order-table'
 import { useDashboard } from '@/hooks/use-dashboard'
+import { useAuth } from '@/components/auth-provider'
 import { Package, Truck, AlertCircle } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Button } from '@/components/ui/button'
 
 export default function Dashboard() {
   const dashboard = useDashboard()
+  const { logout } = useAuth()
 
   return (
     <ProtectedRoute>
@@ -20,24 +23,19 @@ export default function Dashboard() {
         <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
             <div className="flex justify-between items-center">
-              <div className="flex items-center space-x-2 sm:space-x-4">
-                <div className="flex items-center space-x-2 sm:space-x-3">
-                  <div>
-                    <img src="/logo.svg" alt="Salma Collection" className="h-6 w-6 sm:h-7 sm:w-7" />
-                  </div>
-                  <div className="hidden sm:block">
-                    <h1 className="text-lg sm:text-xl font-bold text-gray-900">Salma Collection</h1>
-                    <p className="text-xs sm:text-sm text-gray-500 font-medium">Order Management System</p>
-                  </div>
-                  <div className="sm:hidden">
-                    <h1 className="text-lg font-bold text-gray-900">Salma</h1>
-                    <p className="text-xs text-gray-500 font-medium">Orders</p>
-                  </div>
-                </div>
+              <div className="flex items-center">
+                <img src="/logo.svg" alt="Salma Collection" className="h-8 w-8 sm:h-10 sm:w-10" />
               </div>
               
-              <div className="flex items-center space-x-2 sm:space-x-3">
-                <UserProfile />
+              <div className="flex items-center space-x-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={logout}
+                  className="text-sm"
+                >
+                  Sign Out
+                </Button>
               </div>
             </div>
           </div>

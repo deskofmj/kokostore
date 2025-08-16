@@ -299,32 +299,40 @@ export function VerificationModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
-            <Package className="h-5 w-5" />
+          <DialogTitle className="flex items-center space-x-3 text-2xl font-bold">
+            <div className="bg-black p-2 rounded-lg">
+              <Package className="h-6 w-6 text-white" />
+            </div>
             <span>Review & Send to Droppex</span>
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Summary */}
-          <div className="bg-blue-50 rounded-lg p-4">
+          {/* Enhanced Summary */}
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <Package className="h-5 w-5 text-blue-600" />
-                  <span className="font-medium text-blue-900">
-                    {orders.length} order{orders.length !== 1 ? 's' : ''} selected
-                  </span>
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-3">
+                  <div className="bg-black p-2 rounded-lg">
+                    <Package className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="text-lg font-bold text-gray-900">
+                      {orders.length} order{orders.length !== 1 ? 's' : ''} selected
+                    </span>
+                    <p className="text-sm text-gray-600">Ready to send to Droppex</p>
+                  </div>
                 </div>
-                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                  {totalValue.toFixed(2)} TND
-                </Badge>
+                <div className="bg-white rounded-lg px-4 py-2 border border-gray-200">
+                  <span className="text-sm text-gray-600">Total Value</span>
+                  <p className="text-xl font-bold text-gray-900">{totalValue.toFixed(2)} TND</p>
+                </div>
               </div>
               {hasChanges && (
-                <Badge variant="outline" className="border-orange-200 text-orange-700">
-                  Modified
+                <Badge variant="outline" className="border-gray-300 text-gray-700 bg-gray-100 px-3 py-1">
+                  ✏️ Modified
                 </Badge>
               )}
             </div>
@@ -355,16 +363,22 @@ export function VerificationModal({
               const zipCode = (shipping?.zip as string) || (order.shipping_address?.zip as string)
 
               return (
-                <div key={order.id} className="border rounded-lg p-4 space-y-4">
+                <div key={order.id} className="bg-gray-50 border-2 border-gray-200 rounded-xl p-6 space-y-6 hover:border-gray-400 transition-colors">
                   {/* Order Header */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium text-gray-900">
-                        Order #{order.id}
-                      </span>
+                    <div className="flex items-center space-x-3">
+                      <div className="bg-black p-2 rounded-lg">
+                        <span className="font-bold text-white">#{order.id}</span>
+                      </div>
+                      <div>
+                        <span className="text-lg font-bold text-gray-900">
+                          Order #{order.id}
+                        </span>
+                        <p className="text-sm text-gray-600">{(order.total_price || 0).toFixed(2)} TND</p>
+                      </div>
                       {order.editedCustomer || order.editedShipping ? (
-                        <Badge variant="outline" className="text-xs">
-                          Modified
+                        <Badge variant="outline" className="text-xs bg-gray-100 text-gray-700 border-gray-300">
+                          ✏️ Modified
                         </Badge>
                       ) : null}
                     </div>
@@ -374,7 +388,7 @@ export function VerificationModal({
                           <Button
                             size="sm"
                             onClick={() => handleSaveOrder(order.id)}
-                            className="bg-green-600 hover:bg-green-700"
+                            className="bg-black hover:bg-gray-800 text-white"
                           >
                             <Check className="h-4 w-4 mr-1" />
                             Save
@@ -383,6 +397,7 @@ export function VerificationModal({
                             size="sm"
                             variant="outline"
                             onClick={() => handleCancelEdit(order.id)}
+                            className="border-gray-300 text-gray-700 hover:bg-gray-50"
                           >
                             <X className="h-4 w-4 mr-1" />
                             Cancel
@@ -393,6 +408,7 @@ export function VerificationModal({
                           size="sm"
                           variant="outline"
                           onClick={() => handleEditOrder(order.id)}
+                          className="border-gray-300 text-gray-700 hover:bg-gray-50"
                         >
                           <Edit className="h-4 w-4 mr-1" />
                           Edit
@@ -416,14 +432,15 @@ export function VerificationModal({
                   )}
 
                   {/* Customer Info */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-3">
-                      <Label className="text-sm font-medium text-gray-700">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <Label className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                        <User className="h-4 w-4 mr-2 text-gray-600" />
                         Customer Information
                       </Label>
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <div>
-                          <Label htmlFor={`name-${order.id}`} className="text-xs">
+                          <Label htmlFor={`name-${order.id}`} className="text-xs font-medium text-gray-600">
                             Name
                           </Label>
                           {order.isEditing ? (
@@ -431,17 +448,17 @@ export function VerificationModal({
                               id={`name-${order.id}`}
                               value={customerName}
                               onChange={(e) => handleFieldChange(order.id, 'shipping.name', e.target.value)}
-                              className="h-8"
+                              className="h-9 mt-1 border-gray-300 focus:border-gray-500 focus:ring-gray-500"
                             />
                           ) : (
-                            <div className="flex items-center space-x-2 text-sm">
-                              <User className="h-4 w-4 text-gray-400" />
-                              <span>{customerName}</span>
+                            <div className="flex items-center space-x-2 text-sm mt-1 p-2 bg-white rounded border border-gray-200">
+                              <User className="h-4 w-4 text-gray-500" />
+                              <span className="font-medium">{customerName}</span>
                             </div>
                           )}
                         </div>
                         <div>
-                          <Label htmlFor={`email-${order.id}`} className="text-xs">
+                          <Label htmlFor={`email-${order.id}`} className="text-xs font-medium text-gray-600">
                             Email
                           </Label>
                           {order.isEditing ? (
@@ -450,17 +467,17 @@ export function VerificationModal({
                               type="email"
                               value={email || ''}
                               onChange={(e) => handleFieldChange(order.id, 'customer.email', e.target.value)}
-                              className="h-8"
+                              className="h-9 mt-1 border-gray-300 focus:border-gray-500 focus:ring-gray-500"
                             />
                           ) : (
-                            <div className="flex items-center space-x-2 text-sm">
-                              <Mail className="h-4 w-4 text-gray-400" />
-                              <span>{email}</span>
+                            <div className="flex items-center space-x-2 text-sm mt-1 p-2 bg-white rounded border border-gray-200">
+                              <Mail className="h-4 w-4 text-gray-500" />
+                              <span className="font-medium">{email}</span>
                             </div>
                           )}
                         </div>
                         <div>
-                          <Label htmlFor={`phone-${order.id}`} className="text-xs">
+                          <Label htmlFor={`phone-${order.id}`} className="text-xs font-medium text-gray-600">
                             Phone
                           </Label>
                           {order.isEditing ? (
@@ -468,12 +485,12 @@ export function VerificationModal({
                               id={`phone-${order.id}`}
                               value={phone || ''}
                               onChange={(e) => handleFieldChange(order.id, 'customer.phone', e.target.value)}
-                              className="h-8"
+                              className="h-9 mt-1 border-gray-300 focus:border-gray-500 focus:ring-gray-500"
                             />
                           ) : (
-                            <div className="flex items-center space-x-2 text-sm">
-                              <Phone className="h-4 w-4 text-gray-400" />
-                              <span>{phone}</span>
+                            <div className="flex items-center space-x-2 text-sm mt-1 p-2 bg-white rounded border border-gray-200">
+                              <Phone className="h-4 w-4 text-gray-500" />
+                              <span className="font-medium">{phone}</span>
                             </div>
                           )}
                         </div>
@@ -481,13 +498,14 @@ export function VerificationModal({
                     </div>
 
                     {/* Shipping Address */}
-                    <div className="space-y-3">
-                      <Label className="text-sm font-medium text-gray-700">
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <Label className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                        <MapPin className="h-4 w-4 mr-2 text-gray-600" />
                         Shipping Address
                       </Label>
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <div>
-                          <Label htmlFor={`address1-${order.id}`} className="text-xs">
+                          <Label htmlFor={`address1-${order.id}`} className="text-xs font-medium text-gray-600">
                             Address
                           </Label>
                           {order.isEditing ? (
@@ -495,18 +513,18 @@ export function VerificationModal({
                               id={`address1-${order.id}`}
                               value={address || ''}
                               onChange={(e) => handleFieldChange(order.id, 'shipping.address1', e.target.value)}
-                              className="h-8"
+                              className="h-9 mt-1 border-gray-300 focus:border-gray-500 focus:ring-gray-500"
                             />
                           ) : (
-                            <div className="flex items-start space-x-2 text-sm">
-                              <MapPin className="h-4 w-4 text-gray-400 mt-0.5" />
-                              <span>{address}</span>
+                            <div className="flex items-start space-x-2 text-sm mt-1 p-2 bg-white rounded border border-gray-200">
+                              <MapPin className="h-4 w-4 text-gray-500 mt-0.5" />
+                              <span className="font-medium">{address}</span>
                             </div>
                           )}
                         </div>
                         <div className="grid grid-cols-3 gap-2">
                           <div>
-                            <Label htmlFor={`city-${order.id}`} className="text-xs">
+                            <Label htmlFor={`city-${order.id}`} className="text-xs font-medium text-gray-600">
                               City
                             </Label>
                             {order.isEditing ? (
@@ -514,29 +532,29 @@ export function VerificationModal({
                                 id={`city-${order.id}`}
                                 value={city || ''}
                                 onChange={(e) => handleFieldChange(order.id, 'shipping.city', e.target.value)}
-                                className="h-8"
+                                className="h-9 mt-1 border-gray-300 focus:border-gray-500 focus:ring-gray-500"
                               />
                             ) : (
-                              <span className="text-sm">{city}</span>
+                              <span className="text-sm mt-1 p-2 bg-white rounded border border-gray-200 block font-medium">{city}</span>
                             )}
                           </div>
                           <div>
-                            <Label htmlFor={`province-${order.id}`} className="text-xs">
+                            <Label htmlFor={`province-${order.id}`} className="text-xs font-medium text-gray-600">
                               Province
                             </Label>
                             {order.isEditing ? (
                               <Input
                                 id={`province-${order.id}`}
-                                value={province || ''}
+                                value={province || 'Tunis'}
                                 onChange={(e) => handleFieldChange(order.id, 'shipping.province', e.target.value)}
-                                className="h-8"
+                                className="h-9 mt-1 border-gray-300 focus:border-gray-500 focus:ring-gray-500"
                               />
                             ) : (
-                              <span className="text-sm">{province || 'Tunis'}</span>
+                              <span className="text-sm mt-1 p-2 bg-white rounded border border-gray-200 block font-medium">{province || 'Tunis'}</span>
                             )}
                           </div>
                           <div>
-                            <Label htmlFor={`zip-${order.id}`} className="text-xs">
+                            <Label htmlFor={`zip-${order.id}`} className="text-xs font-medium text-gray-600">
                               ZIP
                             </Label>
                             {order.isEditing ? (
@@ -544,10 +562,10 @@ export function VerificationModal({
                                 id={`zip-${order.id}`}
                                 value={zipCode || ''}
                                 onChange={(e) => handleFieldChange(order.id, 'shipping.zip', e.target.value)}
-                                className="h-8"
+                                className="h-9 mt-1 border-gray-300 focus:border-gray-500 focus:ring-gray-500"
                               />
                             ) : (
-                              <span className="text-sm">{zipCode}</span>
+                              <span className="text-sm mt-1 p-2 bg-white rounded border border-gray-200 block font-medium">{zipCode}</span>
                             )}
                           </div>
                         </div>
@@ -561,27 +579,44 @@ export function VerificationModal({
 
           {/* Action Buttons */}
           <Separator />
-          <div className="flex justify-end space-x-3">
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSendToDroppex}
-              disabled={sendingOrders}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              {sendingOrders ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Sending...
-                </>
-              ) : (
-                <>
-                  <Send className="h-4 w-4 mr-2" />
-                  Send to Droppex
-                </>
-              )}
-            </Button>
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="bg-black p-2 rounded-lg">
+                  <Send className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Ready to send to Droppex</p>
+                  <p className="text-xs text-gray-500">Review all information before sending</p>
+                </div>
+              </div>
+              <div className="flex space-x-3">
+                <Button 
+                  variant="outline" 
+                  onClick={onClose}
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSendToDroppex}
+                  disabled={sendingOrders}
+                  className="bg-black hover:bg-gray-800 text-white font-semibold px-6 py-2"
+                >
+                  {sendingOrders ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Sending to Droppex...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4 mr-2" />
+                      Send to Droppex
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </DialogContent>

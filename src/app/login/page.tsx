@@ -67,60 +67,60 @@ export default function LoginPage() {
     <AuthRedirect>
       <div className="min-h-screen flex">
         {/* Left side - Login Form */}
-        <div className="flex-1 flex items-center justify-center p-8 bg-white">
+        <div className="flex-1 flex items-center justify-center p-4 sm:p-8 bg-white">
           <div className="w-full max-w-md">
             <Card className="border-0 bg-white">
-              <CardHeader className="space-y-1 pb-6">
-                              <div className="flex items-center justify-center mb-6">
-                <div>
-                  <img src="/logo.svg" alt="Salma Collection" className="h-8 w-8" />
+              <CardHeader className="space-y-1 pb-4 sm:pb-6">
+                <div className="flex items-center justify-center mb-4 sm:mb-6">
+                  <div>
+                    <img src="/logo.svg" alt="Salma Collection" className="h-6 w-6 sm:h-8 sm:w-8" />
+                  </div>
                 </div>
-              </div>
-                <CardTitle className="text-2xl font-bold text-center text-slate-900">
+                <CardTitle className="text-xl sm:text-2xl font-bold text-center text-slate-900">
                   Welcome to Salma Collection
                 </CardTitle>
-                <CardDescription className="text-center text-slate-600">
+                <CardDescription className="text-center text-xs sm:text-sm text-slate-600">
                   Sign in to your order management system
                 </CardDescription>
               </CardHeader>
           
-          <CardContent className="space-y-4">
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <CardContent className="space-y-3 sm:space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username" className="text-sm font-medium text-slate-700">
+                <Label htmlFor="username" className="text-xs sm:text-sm font-medium text-slate-700">
                   Username
                 </Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 text-slate-400" />
+                  <Input
                     id="username"
-                type="text"
-                required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                    type="text"
+                    required
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Enter your username"
-                    className="pl-10 h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500"
+                    className="pl-9 sm:pl-10 h-10 sm:h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500 text-sm"
                     disabled={isSubmitting}
-              />
-            </div>
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium text-slate-700">
+                <Label htmlFor="password" className="text-xs sm:text-sm font-medium text-slate-700">
                   Password
                 </Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 text-slate-400" />
+                  <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Enter your password"
-                    className="pl-10 pr-10 h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500"
+                    className="pl-9 sm:pl-10 pr-10 h-10 sm:h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500 text-sm"
                     disabled={isSubmitting}
                   />
                   <button
@@ -130,34 +130,34 @@ export default function LoginPage() {
                     disabled={isSubmitting}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
+                      <EyeOff className="h-3 w-3 sm:h-4 sm:w-4" />
                     ) : (
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                     )}
                   </button>
-            </div>
-          </div>
+                </div>
+              </div>
 
 
 
             <Button
               type="submit"
-                disabled={isSubmitting || !username || !password}
-                className="w-full h-11 bg-black hover:bg-gray-800 text-white font-medium rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
-                  </>
-                ) : (
-                  'Sign In'
-                )}
+              disabled={isSubmitting || !username || !password}
+              className="w-full h-10 sm:h-11 bg-black hover:bg-gray-800 text-white font-medium rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                'Sign In'
+              )}
             </Button>
             </form>
           </CardContent>
 
-          <CardFooter className="flex flex-col space-y-4">
+          <CardFooter className="flex flex-col space-y-3 sm:space-y-4">
             <Separator />
             <div className="text-center">
               <p className="text-xs text-slate-500">

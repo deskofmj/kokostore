@@ -193,11 +193,22 @@ export function validateOrderForDroppex(order: Order): DroppexMappingValidation 
     warnings.push('No line items found')
   }
   
-  // Get libelle from order name or first line item
+  // Get enhanced libelle with all product details
   const getLibelle = (): string => {
     if (order.line_items && order.line_items.length > 0) {
-      const firstItem = order.line_items[0] as Record<string, unknown>
-      return (firstItem.title as string) || (firstItem.name as string) || order.name
+      const productDetails = order.line_items.map((item: Record<string, unknown>) => {
+        const title = (item.title as string) || (item.name as string) || 'Unknown Product'
+        const quantity = (item.quantity as number) || 1
+        const variant = (item.variant_title as string) || ''
+        
+        if (variant) {
+          return `${title} (${variant}) x${quantity}`
+        } else {
+          return `${title} x${quantity}`
+        }
+      }).join(', ')
+      
+      return productDetails
     }
     return order.name
   }

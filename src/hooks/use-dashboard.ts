@@ -18,7 +18,6 @@ export function useDashboard() {
   const [sendingOrders, setSendingOrders] = useState(false)
   const [shopifyStatus, setShopifyStatus] = useState<ShopifyStatus>({ connected: false })
   const [activeTab, setActiveTab] = useState('new')
-  const [statusFilter, setStatusFilter] = useState('all')
   const [showVerificationModal, setShowVerificationModal] = useState(false)
   const [ordersToSend, setOrdersToSend] = useState<Order[]>([])
   const [currentPage, setCurrentPage] = useState(1)
@@ -202,25 +201,10 @@ export function useDashboard() {
   })
 
   const getFilteredOrdersByTab = () => {
-    // First apply search filter
+    // Apply search filter first
     let filtered = filteredOrders
     
-    // Then apply status filter if it's not "all"
-    if (statusFilter !== 'all') {
-      switch (statusFilter) {
-        case 'new':
-          filtered = filtered.filter(o => o.parcel_status === 'Not sent')
-          break
-        case 'sent':
-          filtered = filtered.filter(o => o.parcel_status === 'Sent to Droppex')
-          break
-        case 'failed':
-          filtered = filtered.filter(o => o.parcel_status === 'Failed')
-          break
-      }
-    }
-    
-    // Finally apply tab filter
+    // Then apply tab filter
     switch (activeTab) {
       case 'new':
         return filtered.filter(o => o.parcel_status === 'Not sent')
@@ -252,7 +236,7 @@ export function useDashboard() {
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchTerm, statusFilter, activeTab])
+  }, [searchTerm, activeTab])
 
   return {
     // State
@@ -264,7 +248,6 @@ export function useDashboard() {
     sendingOrders,
     shopifyStatus,
     activeTab,
-    statusFilter,
     showVerificationModal,
     ordersToSend,
     tabOrders: paginatedOrders,
@@ -278,7 +261,6 @@ export function useDashboard() {
     setSelectedOrders,
     setSelectedOrder,
     setActiveTab,
-    setStatusFilter,
     setShowVerificationModal,
     setCurrentPage,
 

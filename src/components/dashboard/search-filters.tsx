@@ -8,8 +8,6 @@ import { Search, Send } from 'lucide-react'
 interface SearchFiltersProps {
   searchTerm: string
   onSearchChange: (value: string) => void
-  statusFilter: string
-  onStatusFilterChange: (value: string) => void
   selectedOrdersCount: number
   onSendSelected: () => void
   sendingOrders: boolean
@@ -18,8 +16,6 @@ interface SearchFiltersProps {
 export function SearchFilters({
   searchTerm,
   onSearchChange,
-  statusFilter,
-  onStatusFilterChange,
   selectedOrdersCount,
   onSendSelected,
   sendingOrders
@@ -39,17 +35,6 @@ export function SearchFilters({
           </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-          <Select value={statusFilter} onValueChange={onStatusFilterChange}>
-            <SelectTrigger className="w-full sm:w-44 h-10 sm:h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 text-sm">
-              <SelectValue placeholder="Filter by Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="new">New Orders</SelectItem>
-              <SelectItem value="sent">Sent Orders</SelectItem>
-              <SelectItem value="failed">Failed Orders</SelectItem>
-            </SelectContent>
-          </Select>
           {selectedOrdersCount > 0 && (
             <Button
               onClick={onSendSelected}

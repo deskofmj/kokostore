@@ -91,7 +91,7 @@ export function OrderTable({
     return (
       <Badge 
         variant={variants[status]}
-        className="text-xs"
+        className="text-xs px-1.5 py-0.5 w-fit"
       >
         {shortLabels[status]}
       </Badge>
@@ -142,7 +142,7 @@ export function OrderTable({
               <TableHead className="text-xs sm:text-sm">Order</TableHead>
               <TableHead className="text-xs sm:text-sm">Customer</TableHead>
               <TableHead className="text-xs sm:text-sm">Total</TableHead>
-              <TableHead className="text-xs sm:text-sm">Status</TableHead>
+              <TableHead className="text-xs sm:text-sm w-20">Status</TableHead>
               <TableHead className="text-xs sm:text-sm">Quality</TableHead>
               <TableHead className="text-xs sm:text-sm">Created</TableHead>
               <TableHead className="text-right text-xs sm:text-sm">Actions</TableHead>
@@ -178,15 +178,8 @@ export function OrderTable({
                     {(order.total_price || 0).toFixed(2)} TND
                   </div>
                 </TableCell>
-                <TableCell>
-                  <div className="flex flex-col gap-2">
-                    {getStatusBadge(order.parcel_status)}
-                    {order.updated_in_shopify && (
-                      <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
-                        ✏️ Edited on Shopify
-                      </Badge>
-                    )}
-                  </div>
+                <TableCell className="w-20">
+                  {getStatusBadge(order.parcel_status)}
                 </TableCell>
                 <TableCell>
                   <DataQualityIndicator order={order} />
@@ -258,7 +251,7 @@ export function OrderTable({
                         disabled={sendingOrders}
                         className="h-8 px-2 sm:h-9 sm:px-3 text-xs sm:text-sm"
                       >
-                        <XCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                        <RotateCcw className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                         <span className="hidden sm:inline">Revert</span>
                       </Button>
                     )}
@@ -506,7 +499,7 @@ function OrderDetails({
               variant="outline"
               className="border-gray-300 text-gray-700 hover:bg-gray-50"
             >
-              <XCircle className="h-4 w-4 mr-2" />
+              <RotateCcw className="h-4 w-4 mr-2" />
               {sendingOrders ? 'Reverting...' : 'Revert Order'}
             </Button>
           )}

@@ -91,8 +91,6 @@ export default function Dashboard() {
           <SearchFilters
             searchTerm={dashboard.searchTerm}
             onSearchChange={dashboard.setSearchTerm}
-            statusFilter={dashboard.statusFilter}
-            onStatusFilterChange={dashboard.setStatusFilter}
             selectedOrdersCount={dashboard.selectedOrders.length}
             onSendSelected={() => dashboard.handlePrepareForDroppex(dashboard.selectedOrders)}
             sendingOrders={dashboard.sendingOrders}

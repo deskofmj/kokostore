@@ -119,13 +119,44 @@ export function validateOrderForDroppex(order: Order): DroppexMappingValidation 
     errors.push('Customer name is required')
   }
   
-  // Phone number validation
-  const phone = order.shipping_address?.phone || 
-                order.customer?.phone || 
-                '00000000'
+  // Phone number validation and cleaning
+  const rawPhone = (order.shipping_address?.phone as string) || 
+                   (order.customer?.phone as string) || 
+                   '00000000'
+  
+  // Clean phone number: remove +216 prefix and any non-digit characters
+  const cleanPhoneNumber = (phoneStr: string): string => {
+    if (phoneStr === '00000000') return phoneStr
+    
+    // Remove +216 prefix if present
+    let cleaned = phoneStr.replace(/^\+216/, '')
+    
+    // Remove any other non-digit characters (spaces, dashes, parentheses, etc.)
+    cleaned = cleaned.replace(/\D/g, '')
+    
+    // If the number starts with 216 after cleaning, remove it
+    if (cleaned.startsWith('216')) {
+      cleaned = cleaned.substring(3)
+    }
+    
+    // Ensure we have a valid length (should be 8 digits for Tunisian numbers)
+    if (cleaned.length === 8) {
+      return cleaned
+    } else if (cleaned.length > 8) {
+      // If longer, take the last 8 digits
+      return cleaned.slice(-8)
+    } else {
+      // If shorter, pad with zeros or return default
+      return cleaned.padEnd(8, '0')
+    }
+  }
+  
+  const phone = cleanPhoneNumber(rawPhone)
   
   if (phone === '00000000') {
     warnings.push('Using default phone number (00000000)')
+  } else if (rawPhone !== phone) {
+    console.log(`Phone number cleaned: "${rawPhone}" → "${phone}"`)
   }
   
   // Address validation

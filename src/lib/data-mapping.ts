@@ -220,6 +220,14 @@ export function validateOrderForDroppex(order: Order): DroppexMappingValidation 
     return `${address1} ${address2}`.trim()
   }
   
+  // Get the libelle content for both libelle and remarque fields
+  const libelleContent = getLibelle()
+  
+  // Combine order note with libelle content for remarque
+  const remarqueContent = order.note 
+    ? `${order.note} | ${libelleContent}`
+    : libelleContent
+
   const mappedData = {
     action: 'add',
     tel_l: phone,
@@ -227,10 +235,10 @@ export function validateOrderForDroppex(order: Order): DroppexMappingValidation 
     gov_l: getGovernorateId(province as string),
     cp_l: zipCode || '1000',  // Postal code field
     cod: (order.total_price || 0).toFixed(2),  // Price field
-    libelle: getLibelle(),
+    libelle: libelleContent,
     nb_piece: (order.line_items?.length || 1).toString(),
     adresse_l: getFullAddress(),
-    remarque: order.note || 'Standard delivery',
+    remarque: remarqueContent,
     tel2_l: phone,  // Same as primary phone for now
     service: 'Livraison'
   }

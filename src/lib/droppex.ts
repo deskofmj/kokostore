@@ -114,16 +114,16 @@ export function mapOrderToDroppexFormat(order: Order): DroppexPackage {
   }
   
   // Add detailed logging for debugging postal code and price issues
-  console.log('Droppex mapping debug:', {
-    orderId: order.id,
-    postalCode: order.shipping_address?.zip,
-    mappedPostalCode: validation.mappedData.cp_l,
-    price: order.total_price,
-    mappedPrice: validation.mappedData.cod,
-    customerName: validation.mappedData.nom_client,
-    address: validation.mappedData.adresse_l,
-    governorate: validation.mappedData.gov_l
-  })
+  // console.log('Droppex mapping debug:', {
+  //   orderId: order.id,
+  //   postalCode: order.shipping_address?.zip,
+  //   mappedPostalCode: validation.mappedData.cp_l,
+  //   price: order.total_price,
+  //   mappedPrice: validation.mappedData.cod,
+  //   customerName: validation.mappedData.nom_client,
+  //   address: validation.mappedData.adresse_l,
+  //   governorate: validation.mappedData.gov_l
+  // })
   
   // Return the validated and mapped data
   return {

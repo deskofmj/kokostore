@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`Verifying Droppex order with tracking number: ${trackingNumber}`)
+    // console.log(`Verifying Droppex order with tracking number: ${trackingNumber}`)
     
     const droppexResponse = await getDroppexPackage(trackingNumber)
     

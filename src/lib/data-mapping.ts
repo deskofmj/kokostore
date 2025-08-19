@@ -1,4 +1,5 @@
 import { Order } from './supabase'
+import { getGovernorateFromPostalCode } from './postal-codes'
 
 export interface DataMappingResult {
   success: boolean
@@ -31,7 +32,7 @@ export function validateShopifyToSupabase(shopifyOrder: Record<string, unknown>)
   }
   
   if (!shopifyOrder.email) {
-    errors.push('Customer email is required')
+    warnings.push('No customer email provided (optional for Droppex)')
   }
   
   // Price validation
@@ -156,7 +157,7 @@ export function validateOrderForDroppex(order: Order): DroppexMappingValidation 
   if (phone === '00000000') {
     warnings.push('Using default phone number (00000000)')
   } else if (rawPhone !== phone) {
-    console.log(`Phone number cleaned: "${rawPhone}" → "${phone}"`)
+    // console.log(`Phone number cleaned: "${rawPhone}" → "${phone}"`)
   }
   
   // Address validation
@@ -182,15 +183,201 @@ export function validateOrderForDroppex(order: Order): DroppexMappingValidation 
     }
   }
   
-  // Province/State validation and governorate code mapping
-  const province = order.shipping_address?.province || ''
-  if (!province) {
-    warnings.push('No province provided, using default (Tunis)')
+  // Enhanced governorate detection from address information
+  const detectGovernorateFromAddress = (order: Order): { governorate: string, method: string } => {
+    const address = order.shipping_address?.address1 || ''
+    const city = order.shipping_address?.city || ''
+    const zipCode = order.shipping_address?.zip || ''
+    const province = order.shipping_address?.province || ''
+    
+    // Method 1: Postal code detection (most accurate)
+    if (zipCode) {
+      const governorateFromPostal = getGovernorateFromPostalCode(zipCode as string)
+      if (governorateFromPostal) {
+        return { governorate: governorateFromPostal, method: 'postal_code' }
+      }
+    }
+    
+    // Method 2: Check if province is already a valid governorate
+    const governorateMap: Record<string, string> = {
+      'Tunis': 'Tunis',
+      'Sousse': 'Sousse', 
+      'Monastir': 'Monastir',
+      'Mahdia': 'Mahdia',
+      'Sfax': 'Sfax',
+      'Gabès': 'Gabès',
+      'Médenine': 'Médenine',
+      'Gafsa': 'Gafsa',
+      'Tozeur': 'Tozeur',
+      'Kébili': 'Kébili',
+      'Kairouan': 'Kairouan',
+      'Kasserine': 'Kasserine',
+      'Sidi Bouzid': 'Sidi Bouzid',
+      'Zaghouan': 'Zaghouan',
+      'Nabeul': 'Nabeul',
+      'Béja': 'Béja',
+      'Jendouba': 'Jendouba',
+      'Le Kef': 'Le Kef',
+      'Siliana': 'Siliana',
+      'Bizerte': 'Bizerte',
+      'Béni Arous': 'Béni Arous',
+      'Ariana': 'Ariana',
+      'Manouba': 'Manouba',
+      'Tataouine': 'Tataouine'
+    }
+    
+        // If province is already a valid governorate, use it
+    if (province && governorateMap[province as string]) {
+      return { governorate: governorateMap[province as string], method: 'province' }
+    }
+    
+    // Method 3: Detect from city name (enhanced with more variations)
+    const cityToGovernorate: Record<string, string> = {
+      // Tunis Governorate
+      'tunis': 'Tunis',
+      'la marsa': 'Tunis',
+      'carthage': 'Tunis',
+      'sidi bou said': 'Tunis',
+      'le bardo': 'Tunis',
+      'ariana': 'Ariana',
+      'la soukra': 'Ariana',
+      'raoued': 'Ariana',
+      
+      // Sousse Governorate
+      'sousse': 'Sousse',
+      'hammam sousse': 'Sousse',
+      'kantaoui': 'Sousse',
+      'msaken': 'Sousse',
+      'enfidha': 'Sousse',
+      'monastir': 'Monastir',
+      'moknine': 'Monastir',
+      'jemmal': 'Monastir',
+      'mahdia': 'Mahdia',
+      'rejiche': 'Mahdia',
+      
+      // Sfax Governorate
+      'sfax': 'Sfax',
+      'sakiet ezzit': 'Sfax',
+      'thyna': 'Sfax',
+      
+      // Gabès Governorate (enhanced with variations)
+      'gabès': 'Gabès',
+      'gabes': 'Gabès', // Handle non-accented version
+      'métouia': 'Gabès',
+      'metouia': 'Gabès', // Handle non-accented version
+      'el hamma': 'Gabès',
+      'mareth': 'Gabès',
+      'ghannouche': 'Gabès',
+      'matmata': 'Gabès',
+      'menzel habib': 'Gabès',
+      
+      // Médenine Governorate
+      'médenine': 'Médenine',
+      'medenine': 'Médenine', // Handle non-accented version
+      'zarzis': 'Médenine',
+      'djerba': 'Médenine',
+      'houmet souk': 'Médenine',
+      'midoun': 'Médenine',
+      
+      // Other major cities
+      'gafsa': 'Gafsa',
+      'tozeur': 'Tozeur',
+      'kébili': 'Kébili',
+      'kebili': 'Kébili', // Handle non-accented version
+      'kairouan': 'Kairouan',
+      'kasserine': 'Kasserine',
+      'sidi bouzid': 'Sidi Bouzid',
+      'zaghouan': 'Zaghouan',
+      'nabeul': 'Nabeul',
+      'hammamet': 'Nabeul',
+      'béja': 'Béja',
+      'beja': 'Béja', // Handle non-accented version
+      'jendouba': 'Jendouba',
+      'le kef': 'Le Kef',
+      'siliana': 'Siliana',
+      'bizerte': 'Bizerte',
+      'béni arous': 'Béni Arous',
+      'beni arous': 'Béni Arous', // Handle non-accented version
+      'manouba': 'Manouba',
+      'tataouine': 'Tataouine'
+    }
+    
+    const normalizedCity = (city as string).toLowerCase().trim()
+    if (cityToGovernorate[normalizedCity]) {
+      return { governorate: cityToGovernorate[normalizedCity], method: 'city' }
+    }
+    
+    // Method 4: Detect from postal code ranges (fallback for invalid postal codes)
+    const postalCodeRanges: Record<string, { min: number, max: number, name: string }> = {
+      'Tunis': { min: 1000, max: 1099, name: 'Tunis' },
+      'Ariana': { min: 2000, max: 2099, name: 'Ariana' },
+      'Sfax': { min: 3000, max: 3099, name: 'Sfax' },
+      'Sousse': { min: 4000, max: 4099, name: 'Sousse' },
+      'Monastir': { min: 5000, max: 5099, name: 'Monastir' },
+      'Mahdia': { min: 5100, max: 5199, name: 'Mahdia' },
+      'Gabès': { min: 6000, max: 6099, name: 'Gabès' },
+      'Médenine': { min: 6100, max: 6199, name: 'Médenine' },
+      'Gafsa': { min: 2100, max: 2199, name: 'Gafsa' },
+      'Tozeur': { min: 2200, max: 2299, name: 'Tozeur' },
+      'Kébili': { min: 4200, max: 4299, name: 'Kébili' },
+      'Kairouan': { min: 3100, max: 3199, name: 'Kairouan' },
+      'Kasserine': { min: 1200, max: 1299, name: 'Kasserine' },
+      'Sidi Bouzid': { min: 9100, max: 9199, name: 'Sidi Bouzid' },
+      'Zaghouan': { min: 1100, max: 1199, name: 'Zaghouan' },
+      'Nabeul': { min: 8000, max: 8099, name: 'Nabeul' },
+      'Béja': { min: 9000, max: 9099, name: 'Béja' },
+      'Jendouba': { min: 8100, max: 8199, name: 'Jendouba' },
+      'Le Kef': { min: 7100, max: 7199, name: 'Le Kef' },
+      'Siliana': { min: 6100, max: 6199, name: 'Siliana' },
+      'Bizerte': { min: 7000, max: 7099, name: 'Bizerte' },
+      'Béni Arous': { min: 2000, max: 2099, name: 'Béni Arous' },
+      'Manouba': { min: 2000, max: 2099, name: 'Manouba' },
+      'Tataouine': { min: 3200, max: 3299, name: 'Tataouine' }
+    }
+    
+    if (zipCode) {
+      const zip = parseInt(zipCode as string)
+      if (!isNaN(zip)) {
+        for (const [key, range] of Object.entries(postalCodeRanges)) {
+          if (zip >= range.min && zip <= range.max) {
+            return { governorate: range.name, method: 'postal_range' }
+          }
+        }
+      }
+    }
+    
+    // Method 5: Search in address text
+    const addressText = `${address} ${city} ${province}`.toLowerCase()
+    for (const [governorateName, governorateValue] of Object.entries(governorateMap)) {
+      if (addressText.includes(governorateName.toLowerCase())) {
+        return { governorate: governorateValue, method: 'address_text' }
+      }
+    }
+    
+    // Default fallback
+    return { governorate: 'Tunis', method: 'default' }
   }
   
-  // Map province to governorate ID (you may need to adjust these mappings)
-  const getGovernorateId = (provinceName: string): string => {
-    const governorateMap: Record<string, string> = {
+  // Detect governorate from address information
+  const detectionResult = detectGovernorateFromAddress(order)
+  const detectedGovernorate = detectionResult.governorate
+  const detectionMethod = detectionResult.method
+  const province = order.shipping_address?.province || detectedGovernorate
+  
+  if (!order.shipping_address?.province) {
+    const methodText = detectionMethod === 'postal_code' ? 'from postal code' : 
+                      detectionMethod === 'city' ? 'from city' :
+                      detectionMethod === 'province' ? 'from province' :
+                      detectionMethod === 'postal_range' ? 'from postal code range' :
+                      detectionMethod === 'address_text' ? 'from address text' : 'as default'
+    warnings.push(`No province provided, detected ${methodText}: ${detectedGovernorate}`)
+  } else if ((order.shipping_address.province as string) !== detectedGovernorate) {
+    warnings.push(`Province mismatch: provided "${order.shipping_address.province}" vs detected "${detectedGovernorate}"`)
+  }
+  
+  // Map governorate name to ID
+  const getGovernorateId = (governorateName: string): string => {
+    const governorateIdMap: Record<string, string> = {
       'Tunis': '1',
       'Sousse': '2', 
       'Monastir': '3',
@@ -216,7 +403,7 @@ export function validateOrderForDroppex(order: Order): DroppexMappingValidation 
       'Manouba': '23',
       'Tataouine': '24'
     }
-    return governorateMap[provinceName] || '1' // Default to Tunis
+    return governorateIdMap[governorateName] || '1' // Default to Tunis
   }
   
   // Line items validation
@@ -263,12 +450,12 @@ export function validateOrderForDroppex(order: Order): DroppexMappingValidation 
     action: 'add',
     tel_l: phone,
     nom_client: customerName,
-    gov_l: getGovernorateId(province as string),
-    cp_l: zipCode || '1000',  // Postal code field
+    gov_l: order.shipping_address?.city || '', // Use city name in governorate field
+    cp_l: zipCode || '',  // Leave empty when missing (no default)
     cod: (order.total_price || 0).toFixed(2),  // Price field
     libelle: libelleContent,
     nb_piece: (order.line_items?.length || 1).toString(),
-    adresse_l: getFullAddress(),
+    adresse_l: getFullAddress(), // Use full address (address1 + address2)
     remarque: remarqueContent,
     tel2_l: phone,  // Same as primary phone for now
     service: 'Livraison'

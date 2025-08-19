@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Pagination } from '@/components/ui/pagination'
 import { DataQualityIndicator } from './data-quality-indicator'
+import { getGovernorateFromPostalCode } from '@/lib/postal-codes'
 import { Eye, RotateCcw, Send, AlertCircle, Package, Truck, XCircle } from 'lucide-react'
 
 // Helper function to get the best available customer name
@@ -44,6 +45,137 @@ function getCustomerPhone(order: Order): string {
   return (order.shipping_address?.phone as string) || 
          (order.customer?.phone as string) || 
          'N/A'
+}
+
+// Helper function to detect governorate from address information
+function getDetectedGovernorate(order: Order): { governorate: string, method: string } {
+  const address = order.shipping_address?.address1 || ''
+  const city = order.shipping_address?.city || ''
+  const zipCode = order.shipping_address?.zip || ''
+  const province = order.shipping_address?.province || ''
+  
+      // Method 1: Postal code detection (most accurate)
+    if (zipCode) {
+      const governorateFromPostal = getGovernorateFromPostalCode(zipCode as string)
+      if (governorateFromPostal) {
+        return { governorate: governorateFromPostal, method: 'postal_code' }
+      }
+    }
+  
+  // Method 2: Check if province is already a valid governorate
+  const governorateMap: Record<string, string> = {
+    'Tunis': 'Tunis',
+    'Sousse': 'Sousse', 
+    'Monastir': 'Monastir',
+    'Mahdia': 'Mahdia',
+    'Sfax': 'Sfax',
+    'Gabès': 'Gabès',
+    'Médenine': 'Médenine',
+    'Gafsa': 'Gafsa',
+    'Tozeur': 'Tozeur',
+    'Kébili': 'Kébili',
+    'Kairouan': 'Kairouan',
+    'Kasserine': 'Kasserine',
+    'Sidi Bouzid': 'Sidi Bouzid',
+    'Zaghouan': 'Zaghouan',
+    'Nabeul': 'Nabeul',
+    'Béja': 'Béja',
+    'Jendouba': 'Jendouba',
+    'Le Kef': 'Le Kef',
+    'Siliana': 'Siliana',
+    'Bizerte': 'Bizerte',
+    'Béni Arous': 'Béni Arous',
+    'Ariana': 'Ariana',
+    'Manouba': 'Manouba',
+    'Tataouine': 'Tataouine'
+  }
+  
+      // If province is already a valid governorate, use it
+    if (province && governorateMap[province as string]) {
+      return { governorate: governorateMap[province as string], method: 'province' }
+    }
+  
+  // Method 3: Detect from city name (enhanced with more variations)
+  const cityToGovernorate: Record<string, string> = {
+    'tunis': 'Tunis',
+    'la marsa': 'Tunis',
+    'carthage': 'Tunis',
+    'sidi bou said': 'Tunis',
+    'le bardo': 'Tunis',
+    'ariana': 'Ariana',
+    'la soukra': 'Ariana',
+    'raoued': 'Ariana',
+    'sousse': 'Sousse',
+    'hammam sousse': 'Sousse',
+    'kantaoui': 'Sousse',
+    'msaken': 'Sousse',
+    'enfidha': 'Sousse',
+    'monastir': 'Monastir',
+    'moknine': 'Monastir',
+    'jemmal': 'Monastir',
+    'mahdia': 'Mahdia',
+    'rejiche': 'Mahdia',
+    'sfax': 'Sfax',
+    'sakiet ezzit': 'Sfax',
+    'thyna': 'Sfax',
+    
+    // Gabès Governorate (enhanced with variations)
+    'gabès': 'Gabès',
+    'gabes': 'Gabès', // Handle non-accented version
+    'métouia': 'Gabès',
+    'metouia': 'Gabès', // Handle non-accented version
+    'el hamma': 'Gabès',
+    'mareth': 'Gabès',
+    'ghannouche': 'Gabès',
+    'matmata': 'Gabès',
+    'menzel habib': 'Gabès',
+    
+    // Médenine Governorate
+    'médenine': 'Médenine',
+    'medenine': 'Médenine', // Handle non-accented version
+    'zarzis': 'Médenine',
+    'djerba': 'Médenine',
+    'houmet souk': 'Médenine',
+    'midoun': 'Médenine',
+    
+    // Other major cities
+    'gafsa': 'Gafsa',
+    'tozeur': 'Tozeur',
+    'kébili': 'Kébili',
+    'kebili': 'Kébili', // Handle non-accented version
+    'kairouan': 'Kairouan',
+    'kasserine': 'Kasserine',
+    'sidi bouzid': 'Sidi Bouzid',
+    'zaghouan': 'Zaghouan',
+    'nabeul': 'Nabeul',
+    'hammamet': 'Nabeul',
+    'béja': 'Béja',
+    'beja': 'Béja', // Handle non-accented version
+    'jendouba': 'Jendouba',
+    'le kef': 'Le Kef',
+    'siliana': 'Siliana',
+    'bizerte': 'Bizerte',
+    'béni arous': 'Béni Arous',
+    'beni arous': 'Béni Arous', // Handle non-accented version
+    'manouba': 'Manouba',
+    'tataouine': 'Tataouine'
+  }
+  
+      const normalizedCity = (city as string).toLowerCase().trim()
+    if (cityToGovernorate[normalizedCity]) {
+      return { governorate: cityToGovernorate[normalizedCity], method: 'city' }
+    }
+  
+      // Method 4: Search in address text
+    const addressText = `${address} ${city} ${province}`.toLowerCase()
+    for (const [governorateName, governorateValue] of Object.entries(governorateMap)) {
+      if (addressText.includes(governorateName.toLowerCase())) {
+        return { governorate: governorateValue, method: 'address_text' }
+      }
+    }
+    
+    // Default fallback
+    return { governorate: 'Tunis', method: 'default' }
 }
 
 interface OrderTableProps {
@@ -141,6 +273,7 @@ export function OrderTable({
               </TableHead>
               <TableHead className="text-xs sm:text-sm">Order</TableHead>
               <TableHead className="text-xs sm:text-sm">Customer</TableHead>
+              <TableHead className="text-xs sm:text-sm">Governorate</TableHead>
               <TableHead className="text-xs sm:text-sm">Total</TableHead>
               <TableHead className="text-xs sm:text-sm w-20">Status</TableHead>
               <TableHead className="text-xs sm:text-sm">Quality</TableHead>
@@ -170,6 +303,44 @@ export function OrderTable({
                     </div>
                     <div className="text-xs text-gray-500 hidden sm:block">
                       {getCustomerPhone(order)}
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div>
+                    <div className="font-medium text-gray-900 text-xs sm:text-sm flex items-center">
+                      {(() => {
+                        const detection = getDetectedGovernorate(order)
+                        const methodText = detection.method === 'postal_code' ? 'Postal' :
+                                          detection.method === 'city' ? 'City' :
+                                          detection.method === 'province' ? 'Province' :
+                                          detection.method === 'postal_range' ? 'Range' :
+                                          detection.method === 'address_text' ? 'Address' : 'Default'
+                        return (
+                          <>
+                            {detection.governorate}
+                            {!order.shipping_address?.province && (
+                              <Badge variant="outline" className="ml-2 text-xs bg-blue-50 text-blue-700 border-blue-200">
+                                {methodText}
+                              </Badge>
+                            )}
+                          </>
+                        )
+                      })()}
+                    </div>
+                    <div className="text-xs text-gray-500 hidden sm:block">
+                      {order.shipping_address?.province ? 
+                        `Provided: ${order.shipping_address.province as string}` : 
+                        (() => {
+                          const detection = getDetectedGovernorate(order)
+                          const methodText = detection.method === 'postal_code' ? 'from postal code' :
+                                            detection.method === 'city' ? 'from city' :
+                                            detection.method === 'province' ? 'from province' :
+                                            detection.method === 'postal_range' ? 'from postal code range' :
+                                            detection.method === 'address_text' ? 'from address text' : 'as default'
+                          return `Auto-detected ${methodText}`
+                        })()
+                      }
                     </div>
                   </div>
                 </TableCell>
@@ -448,8 +619,32 @@ function OrderDetails({
             </p>
           </div>
           <div>
+            <p className="text-sm font-medium text-gray-500 mb-1">Governorate</p>
+            <p className="text-gray-900 font-medium">
+              {(() => {
+                const detection = getDetectedGovernorate(order)
+                return (
+                  <>
+                    {detection.governorate}
+                    {order.shipping_address?.province && 
+                      order.shipping_address.province !== detection.governorate && 
+                      <span className="text-orange-600 text-xs ml-2">(mismatch)</span>
+                    }
+                  </>
+                )
+              })()}
+            </p>
+          </div>
+          <div>
             <p className="text-sm font-medium text-gray-500 mb-1">Postal Code</p>
-            <p className="text-gray-900 font-medium">{order.shipping_address?.zip as string || 'N/A'}</p>
+            <p className="text-gray-900 font-medium flex items-center">
+              {order.shipping_address?.zip as string || 'N/A'}
+              {!order.shipping_address?.zip && (
+                <Badge variant="outline" className="ml-2 text-xs bg-orange-50 text-orange-700 border-orange-200">
+                  Missing
+                </Badge>
+              )}
+            </p>
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500 mb-1">Country</p>

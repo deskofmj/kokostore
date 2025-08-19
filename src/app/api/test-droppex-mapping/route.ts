@@ -1,79 +1,78 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getOrders } from '@/lib/supabase'
-import { mapOrderToDroppexFormat } from '@/lib/droppex'
+import { sendOrderToDroppex } from '@/lib/droppex'
+import { getSupabaseClient } from '@/lib/supabase'
+import { validateOrderForDroppex } from '@/lib/data-mapping'
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const orderId = searchParams.get('orderId')
+    const { orderId } = await request.json()
     
     if (!orderId) {
-      return NextResponse.json({ 
-        error: 'orderId parameter is required' 
-      }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Order ID is required' },
+        { status: 400 }
+      )
     }
 
-    const orders = await getOrders()
-    const order = orders.find(o => o.id.toString() === orderId)
+    // Get the order from Supabase
+    const supabase = getSupabaseClient()
+    const { data: order, error } = await supabase
+      .from('salmacollection')
+      .select('*')
+      .eq('id', orderId)
+      .single()
+
+    if (error || !order) {
+      return NextResponse.json(
+        { error: 'Order not found', details: error?.message },
+        { status: 404 }
+      )
+    }
+
+    // Get the mapped data to show what's being sent to Droppex
+    const validation = validateOrderForDroppex(order)
     
-    if (!order) {
-      return NextResponse.json({ 
-        error: `Order ${orderId} not found` 
-      }, { status: 404 })
-    }
+    console.log('Testing Droppex mapping for order:', {
+      id: order.id,
+      name: order.name,
+      postalCode: order.shipping_address?.zip,
+      province: order.shipping_address?.province,
+      city: order.shipping_address?.city,
+      address1: order.shipping_address?.address1,
+      address2: order.shipping_address?.address2
+    })
 
-    // Test the Droppex mapping
-    const droppexPackage = mapOrderToDroppexFormat(order)
+    console.log('Droppex mapped data:', validation.mappedData)
+
+    // Send to Droppex
+    const droppexResponse = await sendOrderToDroppex(order)
     
     return NextResponse.json({
       success: true,
-      order: {
+      orderId,
+      orderDetails: {
         id: order.id,
         name: order.name,
-        total_price: order.total_price,
-        shipping_address: {
-          zip: order.shipping_address?.zip,
-          city: order.shipping_address?.city,
-          province: order.shipping_address?.province,
-          address1: order.shipping_address?.address1,
-          name: order.shipping_address?.name,
-          phone: order.shipping_address?.phone
-        },
-        customer: {
-          first_name: order.customer?.first_name,
-          last_name: order.customer?.last_name,
-          phone: order.customer?.phone
-        }
+        postalCode: order.shipping_address?.zip,
+        province: order.shipping_address?.province,
+        city: order.shipping_address?.city,
+        address: order.shipping_address?.address1,
+        address2: order.shipping_address?.address2,
+        customerName: order.shipping_address?.name,
+        phone: order.shipping_address?.phone
       },
-      droppexMapping: droppexPackage,
-      fieldAnalysis: {
-        postalCode: {
-          original: order.shipping_address?.zip,
-          mapped: droppexPackage.cp_l,
-          isValid: /^\d{4,5}$/.test(droppexPackage.cp_l)
-        },
-        price: {
-          original: order.total_price,
-          mapped: droppexPackage.cod,
-          isValid: !isNaN(parseFloat(droppexPackage.cod || '0'))
-        },
-        customerName: {
-          original: `${order.customer?.first_name || ''} ${order.customer?.last_name || ''}`.trim(),
-          mapped: droppexPackage.nom_client,
-          isValid: !!droppexPackage.nom_client && droppexPackage.nom_client !== ''
-        },
-        governorate: {
-          original: order.shipping_address?.province,
-          mapped: droppexPackage.gov_l,
-          isValid: !isNaN(parseInt(droppexPackage.gov_l))
-        }
-      }
+      droppexMappedData: validation.mappedData,
+      droppexResponse,
+      timestamp: new Date().toISOString()
     })
   } catch (error) {
-    console.error('Test Droppex mapping error:', error)
-    return NextResponse.json({ 
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 })
+    console.error('Error testing Droppex mapping:', error)
+    return NextResponse.json(
+      { 
+        error: 'Failed to test Droppex mapping',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    )
   }
-} 
+}

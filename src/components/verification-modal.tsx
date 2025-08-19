@@ -77,11 +77,32 @@ export function VerificationModal({
   const totalValue = orders.reduce((sum, order) => sum + (order.total_price || 0), 0)
 
   const handleEditOrder = (orderId: number) => {
-    setEditableOrders(prev => prev.map(order => 
-      order.id === orderId 
-        ? { ...order, isEditing: true }
-        : order
-    ))
+    setEditableOrders(prev => prev.map(order => {
+      if (order.id !== orderId) return order
+      
+      // Initialize edited values with current values to prevent fields from going blank
+      const editedOrder: EditableOrder = {
+        ...order,
+        isEditing: true,
+        editedCustomer: {
+          first_name: (order.customer?.first_name as string) || '',
+          last_name: (order.customer?.last_name as string) || '',
+          email: (order.customer?.email as string) || order.email || '',
+          phone: (order.customer?.phone as string) || (order.shipping_address?.phone as string) || ''
+        },
+        editedShipping: {
+          name: (order.shipping_address?.name as string) || '',
+          address1: (order.shipping_address?.address1 as string) || '',
+          address2: (order.shipping_address?.address2 as string) || '',
+          city: (order.shipping_address?.city as string) || '',
+          province: (order.shipping_address?.province as string) || 'Tunis',
+          zip: (order.shipping_address?.zip as string) || '',
+          country: (order.shipping_address?.country as string) || '',
+          phone: (order.shipping_address?.phone as string) || (order.customer?.phone as string) || ''
+        }
+      }
+      return editedOrder
+    }))
   }
 
   const handleSaveOrder = (orderId: number) => {
@@ -172,17 +193,16 @@ export function VerificationModal({
       errors.push('Customer name is required')
     }
     
-    // Email validation - use order.email as fallback
+    // Email validation - optional since Droppex doesn't require it
     const email = (customer?.email as string) || order.email
-    if (!email?.trim()) {
-      errors.push('Email is required')
-    } else {
-      // Email format validation
+    if (email?.trim()) {
+      // Only validate format if email is provided
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       if (!emailRegex.test(email)) {
         errors.push('Invalid email format')
       }
     }
+    // No error if email is missing - it's optional for Droppex
     
     // Phone validation - be more flexible
     const phone = (customer?.phone as string) || (shipping?.phone as string) || (order.customer?.phone as string)
@@ -216,7 +236,8 @@ export function VerificationModal({
     
     const zipCode = (shipping?.zip as string) || (order.shipping_address?.zip as string)
     if (!zipCode?.trim()) {
-      errors.push('ZIP code is required')
+      // Don't error, just warn - ZIP code is optional for Droppex
+      console.warn(`No ZIP code provided for order ${order.id}, will send empty to Droppex`)
     }
 
     return errors
@@ -345,22 +366,38 @@ export function VerificationModal({
               const shipping = order.editedShipping || order.shipping_address
               const orderErrors = errors[order.id] || []
               
-              // Better customer name handling
-              const customerName = (shipping?.name as string) || 
-                                 `${(customer?.first_name as string) || ''} ${(customer?.last_name as string) || ''}`.trim() ||
-                                 order.email // Use email as fallback
+              // Better customer name handling - prioritize edited values
+              const customerName = order.isEditing 
+                ? (order.editedShipping?.name || order.shipping_address?.name || 
+                   `${order.editedCustomer?.first_name || order.customer?.first_name || ''} ${order.editedCustomer?.last_name || order.customer?.last_name || ''}`.trim() ||
+                   order.email)
+                : (shipping?.name as string) || 
+                  `${(customer?.first_name as string) || ''} ${(customer?.last_name as string) || ''}`.trim() ||
+                  order.email
               
-              // Better email handling
-              const email = (customer?.email as string) || order.email
+              // Better email handling - prioritize edited values
+              const email = order.isEditing 
+                ? (order.editedCustomer?.email || order.customer?.email || order.email || '')
+                : (customer?.email as string) || order.email
               
-              // Better phone handling
-              const phone = (customer?.phone as string) || (shipping?.phone as string) || (order.customer?.phone as string)
+              // Better phone handling - prioritize edited values
+              const phone = order.isEditing
+                ? (order.editedCustomer?.phone || order.editedShipping?.phone || order.customer?.phone || order.shipping_address?.phone || '')
+                : (customer?.phone as string) || (shipping?.phone as string) || (order.customer?.phone as string)
               
-              // Better address handling
-              const address = (shipping?.address1 as string) || (order.shipping_address?.address1 as string)
-              const city = (shipping?.city as string) || (order.shipping_address?.city as string)
-              const province = (shipping?.province as string) || (order.shipping_address?.province as string)
-              const zipCode = (shipping?.zip as string) || (order.shipping_address?.zip as string)
+              // Better address handling - prioritize edited values
+              const address = order.isEditing
+                ? (order.editedShipping?.address1 || order.shipping_address?.address1 || '')
+                : (shipping?.address1 as string) || (order.shipping_address?.address1 as string)
+              const city = order.isEditing
+                ? (order.editedShipping?.city || order.shipping_address?.city || '')
+                : (shipping?.city as string) || (order.shipping_address?.city as string)
+              const province = order.isEditing
+                ? (order.editedShipping?.province || order.shipping_address?.province || 'Tunis')
+                : (shipping?.province as string) || (order.shipping_address?.province as string) || 'Tunis'
+              const zipCode = order.isEditing
+                ? (order.editedShipping?.zip || order.shipping_address?.zip || '')
+                : (shipping?.zip as string) || (order.shipping_address?.zip as string)
 
               return (
                 <div key={order.id} className="bg-gray-50 border-2 border-gray-200 rounded-xl p-6 space-y-6 hover:border-gray-400 transition-colors">
@@ -446,7 +483,7 @@ export function VerificationModal({
                           {order.isEditing ? (
                             <Input
                               id={`name-${order.id}`}
-                              value={customerName}
+                              value={(order.editedShipping?.name as string) || (order.shipping_address?.name as string) || ''}
                               onChange={(e) => handleFieldChange(order.id, 'shipping.name', e.target.value)}
                               className="h-9 mt-1 border-gray-300 focus:border-gray-500 focus:ring-gray-500"
                             />
@@ -465,7 +502,7 @@ export function VerificationModal({
                             <Input
                               id={`email-${order.id}`}
                               type="email"
-                              value={email || ''}
+                              value={(order.editedCustomer?.email as string) || (order.customer?.email as string) || order.email || ''}
                               onChange={(e) => handleFieldChange(order.id, 'customer.email', e.target.value)}
                               className="h-9 mt-1 border-gray-300 focus:border-gray-500 focus:ring-gray-500"
                             />
@@ -483,7 +520,7 @@ export function VerificationModal({
                           {order.isEditing ? (
                             <Input
                               id={`phone-${order.id}`}
-                              value={phone || ''}
+                              value={order.editedCustomer?.phone || order.customer?.phone || order.shipping_address?.phone || ''}
                               onChange={(e) => handleFieldChange(order.id, 'customer.phone', e.target.value)}
                               className="h-9 mt-1 border-gray-300 focus:border-gray-500 focus:ring-gray-500"
                             />
@@ -511,7 +548,7 @@ export function VerificationModal({
                           {order.isEditing ? (
                             <Input
                               id={`address1-${order.id}`}
-                              value={address || ''}
+                              value={order.editedShipping?.address1 || order.shipping_address?.address1 || ''}
                               onChange={(e) => handleFieldChange(order.id, 'shipping.address1', e.target.value)}
                               className="h-9 mt-1 border-gray-300 focus:border-gray-500 focus:ring-gray-500"
                             />
@@ -530,7 +567,7 @@ export function VerificationModal({
                             {order.isEditing ? (
                               <Input
                                 id={`city-${order.id}`}
-                                value={city || ''}
+                                value={order.editedShipping?.city || order.shipping_address?.city || ''}
                                 onChange={(e) => handleFieldChange(order.id, 'shipping.city', e.target.value)}
                                 className="h-9 mt-1 border-gray-300 focus:border-gray-500 focus:ring-gray-500"
                               />
@@ -545,7 +582,7 @@ export function VerificationModal({
                             {order.isEditing ? (
                               <Input
                                 id={`province-${order.id}`}
-                                value={province || 'Tunis'}
+                                value={order.editedShipping?.province || order.shipping_address?.province || 'Tunis'}
                                 onChange={(e) => handleFieldChange(order.id, 'shipping.province', e.target.value)}
                                 className="h-9 mt-1 border-gray-300 focus:border-gray-500 focus:ring-gray-500"
                               />
@@ -560,7 +597,7 @@ export function VerificationModal({
                             {order.isEditing ? (
                               <Input
                                 id={`zip-${order.id}`}
-                                value={zipCode || ''}
+                                value={order.editedShipping?.zip || order.shipping_address?.zip || ''}
                                 onChange={(e) => handleFieldChange(order.id, 'shipping.zip', e.target.value)}
                                 className="h-9 mt-1 border-gray-300 focus:border-gray-500 focus:ring-gray-500"
                               />

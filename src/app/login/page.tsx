@@ -34,13 +34,12 @@ export default function LoginPage() {
     try {
       const result = await login(username, password)
       if (result.success) {
-        console.log('Login successful')
         router.push('/')
       } else {
-        console.log('Login failed:', result.error)
+        setError(result.error || 'Login failed')
       }
     } catch (err) {
-      console.log('Login error:', err)
+      setError('An unexpected error occurred')
     } finally {
       setIsSubmitting(false)
     }

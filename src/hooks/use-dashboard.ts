@@ -38,21 +38,17 @@ export function useDashboard() {
         
         if (data.error) {
           setShopifyStatus({ connected: false, message: data.error })
-          console.log('Shopify Connection Error:', data.error)
         } else if (data.message) {
           setShopifyStatus({ connected: false, message: data.message })
-          console.log('Shopify Connection Warning:', data.message)
         } else {
           setShopifyStatus({ connected: true })
-          console.log('Orders Loaded Successfully:', `Loaded ${data.orders?.length || 0} orders from Shopify`)
         }
       } else {
-        console.log('Failed to Load Orders: Unable to fetch orders from Shopify')
+        setShopifyStatus({ connected: false, message: 'Failed to load orders' })
       }
     } catch (error) {
       console.error('Error fetching orders:', error)
       setShopifyStatus({ connected: false, message: 'Failed to connect to Shopify' })
-      console.log('Connection Error: Failed to connect to Shopify. Please check your connection.')
     } finally {
       setLoading(false)
     }
@@ -76,16 +72,15 @@ export function useDashboard() {
         setSelectedOrders([])
         
         if (data.success) {
-          console.log('Orders Sent Successfully:', `Successfully sent ${orderIds.length} order(s) to Droppex`)
+          // Orders sent successfully
         } else {
-          console.log('Failed to Send Orders:', data.error || "An error occurred while sending orders to Droppex")
+          // Handle error silently or show toast
         }
       } else {
-        console.log('Failed to Send Orders: Unable to send orders to Droppex. Please try again.')
+        // Handle network error silently or show toast
       }
     } catch (error) {
       console.error('Error sending orders to Droppex:', error)
-      console.log('Network Error: Failed to send orders to Droppex. Please check your connection.')
     } finally {
       setSendingOrders(false)
     }
@@ -100,12 +95,8 @@ export function useDashboard() {
   const handleRetryFailedOrder = (orderId: number) => {
     const failedOrder = orders.find(order => order.id === orderId && order.parcel_status === 'Failed')
     if (failedOrder) {
-      console.log(`Retrying failed order ${orderId}:`, failedOrder)
       setOrdersToSend([failedOrder])
       setShowVerificationModal(true)
-    } else {
-      console.log(`Order ${orderId} not found or not in failed status`)
-      console.log('Order Not Found:', `Order ${orderId} not found or not in failed status`)
     }
   }
 
@@ -126,16 +117,15 @@ export function useDashboard() {
         setSelectedOrder(null)
         
         if (data.success) {
-          console.log('Order Reverted Successfully:', `Order ${order.name} has been reverted to 'Not sent' status`)
+          // Order reverted successfully
         } else {
-          console.log('Failed to Revert Order:', data.error || "An error occurred while reverting the order")
+          // Handle error silently or show toast
         }
       } else {
-        console.log('Failed to Revert Order: Unable to revert order. Please try again.')
+        // Handle network error silently or show toast
       }
     } catch (error) {
       console.error('Error reverting order:', error)
-      console.log('Network Error: Failed to revert order. Please check your connection.')
     } finally {
       setSendingOrders(false)
     }

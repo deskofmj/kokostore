@@ -11,6 +11,7 @@ import { DataQualityIndicator } from './data-quality-indicator'
 import { getGovernorateFromPostalCode } from '@/lib/postal-codes'
 import { Eye, RotateCcw, Send, AlertCircle, Package, Truck, XCircle, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { useToast } from '@/lib/use-toast'
 
 // Helper function to get the best available customer name
 function getCustomerName(order: Order): string {
@@ -212,6 +213,7 @@ export function OrderTable({
 }: OrderTableProps) {
   const [deleteOrderId, setDeleteOrderId] = useState<number | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const { toast } = useToast()
 
   const handleDeleteClick = (orderId: number) => {
     setDeleteOrderId(orderId)
@@ -286,6 +288,13 @@ export function OrderTable({
                       orders.forEach(order => onOrderSelect(order.id, true))
                     } else {
                       orders.forEach(order => onOrderSelect(order.id, false))
+                      if (selectedOrders.length > 0) {
+                        toast({
+                          title: 'Selection cleared',
+                          description: 'All orders have been deselected.',
+                          variant: 'info',
+                        })
+                      }
                     }
                   }}
                 />

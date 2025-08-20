@@ -32,17 +32,7 @@ export async function POST(request: NextRequest) {
     // Get the mapped data to show what's being sent to Droppex
     const validation = validateOrderForDroppex(order)
     
-    console.log('Testing Droppex mapping for order:', {
-      id: order.id,
-      name: order.name,
-      postalCode: order.shipping_address?.zip,
-      province: order.shipping_address?.province,
-      city: order.shipping_address?.city,
-      address1: order.shipping_address?.address1,
-      address2: order.shipping_address?.address2
-    })
-
-    console.log('Droppex mapped data:', validation.mappedData)
+    // Testing Droppex mapping for order
 
     // Send to Droppex
     const droppexResponse = await sendOrderToDroppex(order)

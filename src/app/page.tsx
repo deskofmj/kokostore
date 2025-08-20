@@ -45,11 +45,11 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
           {/* Stats Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-            {/* Total Orders */}
+            {/* New Orders */}
             <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Orders</p>
+                  <p className="text-sm font-medium text-gray-600">New Orders</p>
                   <p className="text-2xl font-bold text-gray-900">{dashboard.orderStats.total}</p>
                 </div>
                 <div className="bg-gray-100 p-3 rounded-lg">

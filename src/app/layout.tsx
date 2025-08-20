@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Red_Hat_Text } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/components/auth-provider'
+import { Toaster } from '@/components/ui/toaster'
 
 const redHatText = Red_Hat_Text({ 
   subsets: ['latin'],
@@ -47,6 +48,7 @@ export default function RootLayout({
       <body className={redHatText.className}>
         <AuthProvider>
           {children}
+          <Toaster />
         </AuthProvider>
       </body>
     </html>

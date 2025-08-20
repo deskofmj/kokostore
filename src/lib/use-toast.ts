@@ -1,3 +1,5 @@
+'use client'
+
 import * as React from "react"
 
 import type {
@@ -6,7 +8,7 @@ import type {
 } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_REMOVE_DELAY = 3000
 
 type ToasterToast = ToastProps & {
   id: string
@@ -15,7 +17,6 @@ type ToasterToast = ToastProps & {
   action?: ToastActionElement
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
   UPDATE_TOAST: "UPDATE_TOAST",
@@ -91,8 +92,6 @@ export const reducer = (state: State, action: Action): State => {
     case "DISMISS_TOAST": {
       const { toastId } = action
 
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
@@ -169,18 +168,14 @@ function toast({ ...props }: Toast) {
   }
 }
 
+// Check if we're in a browser environment
+const isBrowser = typeof window !== 'undefined'
+
 function useToast() {
-  // Check if we're in a browser environment
-  const [isClient, setIsClient] = React.useState(false)
-
-  React.useEffect(() => {
-    setIsClient(true)
-  }, [])
-
   const [state, setState] = React.useState<State>({ toasts: [] })
 
   React.useEffect(() => {
-    if (!isClient) return
+    if (!isBrowser) return
 
     setState(memoryState)
     listeners.push(setState)
@@ -190,12 +185,12 @@ function useToast() {
         listeners.splice(index, 1)
       }
     }
-  }, [isClient])
+  }, [])
 
   return {
     ...state,
-    toast: isClient ? toast : (() => ({ id: '', dismiss: () => {}, update: () => {} })),
-    dismiss: (toastId?: string) => isClient ? dispatch({ type: "DISMISS_TOAST", toastId }) : () => {},
+    toast: isBrowser ? toast : (() => ({ id: '', dismiss: () => {}, update: () => {} })),
+    dismiss: (toastId?: string) => isBrowser ? dispatch({ type: "DISMISS_TOAST", toastId }) : () => {},
   }
 }
 

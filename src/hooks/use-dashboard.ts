@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Order } from '@/lib/supabase'
+import { useToast } from '@/lib/use-toast'
 
 interface ShopifyStatus {
   connected: boolean;
@@ -23,6 +24,8 @@ export function useDashboard() {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(10)
 
+  const { toast } = useToast()
+
   // Initialize data
   useEffect(() => {
     fetchOrders()
@@ -38,17 +41,33 @@ export function useDashboard() {
         
         if (data.error) {
           setShopifyStatus({ connected: false, message: data.error })
+          toast({
+            title: 'Shopify connection error',
+            description: data.error,
+            variant: 'destructive',
+          })
         } else if (data.message) {
           setShopifyStatus({ connected: false, message: data.message })
+          // Don't show toast for webhook-only mode message in production
         } else {
           setShopifyStatus({ connected: true })
         }
       } else {
         setShopifyStatus({ connected: false, message: 'Failed to load orders' })
+        toast({
+          title: 'Failed to load orders',
+          description: 'Unable to fetch orders from Shopify. Please check your connection.',
+          variant: 'destructive',
+        })
       }
     } catch (error) {
       console.error('Error fetching orders:', error)
       setShopifyStatus({ connected: false, message: 'Failed to connect to Shopify' })
+      toast({
+        title: 'Connection error',
+        description: 'Failed to connect to Shopify. Please check your internet connection.',
+        variant: 'destructive',
+      })
     } finally {
       setLoading(false)
     }
@@ -72,15 +91,32 @@ export function useDashboard() {
         setSelectedOrders([])
         
         if (data.success) {
-          // Orders sent successfully
+          toast({
+            title: 'Orders sent to Droppex',
+            description: `Successfully sent ${orderIds.length} orders to Droppex.`,
+            variant: 'success',
+          })
         } else {
-          // Handle error silently or show toast
+          toast({
+            title: 'Failed to send orders to Droppex',
+            description: 'Failed to send orders to Droppex. Please try again.',
+            variant: 'destructive',
+          })
         }
       } else {
-        // Handle network error silently or show toast
+        toast({
+          title: 'Network error sending orders to Droppex',
+          description: 'Failed to send orders to Droppex. Please try again.',
+          variant: 'destructive',
+        })
       }
     } catch (error) {
       console.error('Error sending orders to Droppex:', error)
+      toast({
+        title: 'Error sending orders to Droppex',
+        description: 'Failed to send orders to Droppex. Please try again.',
+        variant: 'destructive',
+      })
     } finally {
       setSendingOrders(false)
     }
@@ -90,6 +126,11 @@ export function useDashboard() {
     const selectedOrders = orders.filter(order => orderIds.includes(order.id))
     setOrdersToSend(selectedOrders)
     setShowVerificationModal(true)
+    toast({
+      title: 'Preparing orders for Droppex',
+      description: `Preparing ${selectedOrders.length} orders for verification...`,
+      variant: 'info',
+    })
   }
 
   const handleRetryFailedOrder = (orderId: number) => {
@@ -97,6 +138,17 @@ export function useDashboard() {
     if (failedOrder) {
       setOrdersToSend([failedOrder])
       setShowVerificationModal(true)
+      toast({
+        title: 'Retrying order',
+        description: `Preparing to retry order ${failedOrder.name}...`,
+        variant: 'info',
+      })
+    } else {
+      toast({
+        title: 'Order not found',
+        description: 'The order you are trying to retry was not found.',
+        variant: 'warning',
+      })
     }
   }
 
@@ -117,15 +169,32 @@ export function useDashboard() {
         setSelectedOrder(null)
         
         if (data.success) {
-          // Order reverted successfully
+          toast({
+            title: 'Order reverted',
+            description: `Order ${order.name} reverted successfully.`,
+            variant: 'success',
+          })
         } else {
-          // Handle error silently or show toast
+          toast({
+            title: 'Failed to revert order',
+            description: `Failed to revert order ${order.name}. Please try again.`,
+            variant: 'destructive',
+          })
         }
       } else {
-        // Handle network error silently or show toast
+        toast({
+          title: 'Network error reverting order',
+          description: `Failed to revert order ${order.name}. Please try again.`,
+          variant: 'destructive',
+        })
       }
     } catch (error) {
       console.error('Error reverting order:', error)
+      toast({
+        title: 'Error reverting order',
+        description: 'Failed to revert order. Please try again.',
+        variant: 'destructive',
+      })
     } finally {
       setSendingOrders(false)
     }
@@ -148,15 +217,32 @@ export function useDashboard() {
         setSelectedOrders([]) // Clear selection
         
         if (data.success) {
-          // Orders deleted successfully
+          toast({
+            title: 'Orders deleted',
+            description: `Successfully deleted ${orderIds.length} orders.`,
+            variant: 'success',
+          })
         } else {
-          // Handle error silently or show toast
+          toast({
+            title: 'Failed to delete orders',
+            description: 'Failed to delete orders. Please try again.',
+            variant: 'destructive',
+          })
         }
       } else {
-        // Handle network error silently or show toast
+        toast({
+          title: 'Network error deleting orders',
+          description: 'Failed to delete orders. Please try again.',
+          variant: 'destructive',
+        })
       }
     } catch (error) {
       console.error('Error deleting orders:', error)
+      toast({
+        title: 'Error deleting orders',
+        description: 'Failed to delete orders. Please try again.',
+        variant: 'destructive',
+      })
     } finally {
       setSendingOrders(false)
     }
@@ -176,7 +262,21 @@ export function useDashboard() {
   }
 
   const handleSendOrder = (orderId: number) => {
-    handlePrepareForDroppex([orderId])
+    const order = orders.find(o => o.id === orderId)
+    if (order) {
+      handlePrepareForDroppex([orderId])
+      toast({
+        title: 'Preparing to send order',
+        description: `Preparing to send order ${order.name} to Droppex...`,
+        variant: 'info',
+      })
+    } else {
+      toast({
+        title: 'Order not found',
+        description: 'The order you are trying to send was not found.',
+        variant: 'warning',
+      })
+    }
   }
 
   // Filtering and Search
@@ -240,7 +340,7 @@ export function useDashboard() {
 
   // Statistics
   const orderStats = {
-    total: orders.length,
+    total: orders.filter(o => o.parcel_status === 'Not sent').length, // Show only new orders
     notSent: orders.filter(o => o.parcel_status === 'Not sent').length,
     sent: orders.filter(o => o.parcel_status === 'Sent to Droppex').length,
     failed: orders.filter(o => o.parcel_status === 'Failed').length,

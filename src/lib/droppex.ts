@@ -105,13 +105,7 @@ export function mapOrderToDroppexFormat(order: Order): DroppexPackage {
   // Use the validation function to get properly mapped data
   const validation = validateOrderForDroppex(order)
   
-  if (!validation.isValid) {
-    console.warn('Order validation failed:', validation.errors)
-  }
-  
-  if (validation.warnings.length > 0) {
-    console.warn('Order validation warnings:', validation.warnings)
-  }
+  // Validation warnings are handled silently in production
   
   // Add detailed logging for debugging postal code and price issues
   // console.log('Droppex mapping debug:', {

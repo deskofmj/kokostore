@@ -151,4 +151,17 @@ export async function clearUpdatedInShopifyFlag(orderId: number) {
   if (error) {
     throw new Error(`Error clearing updated flag: ${error.message}`)
   }
+}
+
+export async function deleteOrders(orderIds: number[]) {
+  const supabase = getSupabaseClient()
+  
+  const { error } = await supabase
+    .from('salmacollection')
+    .delete()
+    .in('id', orderIds)
+
+  if (error) {
+    throw new Error(`Error deleting orders: ${error.message}`)
+  }
 } 

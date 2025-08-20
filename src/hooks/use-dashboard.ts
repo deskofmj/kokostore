@@ -131,6 +131,37 @@ export function useDashboard() {
     }
   }
 
+  const handleDeleteOrders = async (orderIds: number[]) => {
+    setSendingOrders(true)
+    try {
+      const response = await fetch('/api/delete-orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ orderIds }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        await fetchOrders() // Refresh orders
+        setSelectedOrders([]) // Clear selection
+        
+        if (data.success) {
+          // Orders deleted successfully
+        } else {
+          // Handle error silently or show toast
+        }
+      } else {
+        // Handle network error silently or show toast
+      }
+    } catch (error) {
+      console.error('Error deleting orders:', error)
+    } finally {
+      setSendingOrders(false)
+    }
+  }
+
   // Order Selection Functions
   const handleOrderSelect = (orderId: number, selected: boolean) => {
     if (selected) {
@@ -260,6 +291,7 @@ export function useDashboard() {
     handlePrepareForDroppex,
     handleRetryFailedOrder,
     handleRevertOrder,
+    handleDeleteOrders,
     handleOrderSelect,
     handleViewOrder,
     handleSendOrder,

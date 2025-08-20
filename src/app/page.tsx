@@ -91,6 +91,7 @@ export default function Dashboard() {
             onSearchChange={dashboard.setSearchTerm}
             selectedOrdersCount={dashboard.selectedOrders.length}
             onSendSelected={() => dashboard.handlePrepareForDroppex(dashboard.selectedOrders)}
+            onDeleteSelected={() => dashboard.handleDeleteOrders(dashboard.selectedOrders)}
             sendingOrders={dashboard.sendingOrders}
           />
 
@@ -141,6 +142,7 @@ export default function Dashboard() {
                   onRetryOrder={dashboard.handleRetryFailedOrder}
                   onRevertOrder={dashboard.handleRevertOrder}
                   onSendOrder={dashboard.handleSendOrder}
+                  onDeleteOrder={(orderId) => dashboard.handleDeleteOrders([orderId])}
                   sendingOrders={dashboard.sendingOrders}
                   currentPage={dashboard.currentPage}
                   totalPages={dashboard.totalPages}
@@ -158,6 +160,7 @@ export default function Dashboard() {
                   onRetryOrder={dashboard.handleRetryFailedOrder}
                   onRevertOrder={dashboard.handleRevertOrder}
                   onSendOrder={dashboard.handleSendOrder}
+                  onDeleteOrder={(orderId) => dashboard.handleDeleteOrders([orderId])}
                   sendingOrders={dashboard.sendingOrders}
                   currentPage={dashboard.currentPage}
                   totalPages={dashboard.totalPages}
@@ -175,11 +178,12 @@ export default function Dashboard() {
                   onRetryOrder={dashboard.handleRetryFailedOrder}
                   onRevertOrder={dashboard.handleRevertOrder}
                   onSendOrder={dashboard.handleSendOrder}
+                  onDeleteOrder={(orderId) => dashboard.handleDeleteOrders([orderId])}
                   sendingOrders={dashboard.sendingOrders}
                   currentPage={dashboard.currentPage}
                   totalPages={dashboard.totalPages}
                   onPageChange={dashboard.setCurrentPage}
-                />
+              />
               </TabsContent>
             </Tabs>
           </div>

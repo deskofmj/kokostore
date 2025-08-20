@@ -5,11 +5,12 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Pagination } from '@/components/ui/pagination'
 import { DataQualityIndicator } from './data-quality-indicator'
 import { getGovernorateFromPostalCode } from '@/lib/postal-codes'
-import { Eye, RotateCcw, Send, AlertCircle, Package, Truck, XCircle } from 'lucide-react'
+import { Eye, RotateCcw, Send, AlertCircle, Package, Truck, XCircle, Trash2 } from 'lucide-react'
+import { useState } from 'react'
 
 // Helper function to get the best available customer name
 function getCustomerName(order: Order): string {
@@ -187,6 +188,7 @@ interface OrderTableProps {
   onRetryOrder: (orderId: number) => void
   onRevertOrder: (order: Order) => void
   onSendOrder: (orderId: number) => void
+  onDeleteOrder: (orderId: number) => void
   sendingOrders: boolean
   currentPage?: number
   totalPages?: number
@@ -202,11 +204,27 @@ export function OrderTable({
   onRetryOrder,
   onRevertOrder,
   onSendOrder,
+  onDeleteOrder,
   sendingOrders,
   currentPage,
   totalPages,
   onPageChange
 }: OrderTableProps) {
+  const [deleteOrderId, setDeleteOrderId] = useState<number | null>(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
+  const handleDeleteClick = (orderId: number) => {
+    setDeleteOrderId(orderId)
+    setShowDeleteDialog(true)
+  }
+
+  const handleConfirmDelete = () => {
+    if (deleteOrderId) {
+      onDeleteOrder(deleteOrderId)
+      setShowDeleteDialog(false)
+      setDeleteOrderId(null)
+    }
+  }
   const getStatusBadge = (status: Order['parcel_status']) => {
     const variants = {
       'Not sent': 'secondary',
@@ -254,7 +272,8 @@ export function OrderTable({
   }
 
   return (
-    <div className="bg-white rounded-2xl border-0 overflow-hidden">
+    <>
+      <div className="bg-white rounded-2xl border-0 overflow-hidden">
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
@@ -426,6 +445,17 @@ export function OrderTable({
                         <span className="hidden sm:inline">Revert</span>
                       </Button>
                     )}
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteClick(order.id)}
+                      disabled={sendingOrders}
+                      className="h-8 px-2 sm:h-9 sm:px-3 text-xs sm:text-sm text-red-600 border-red-200 hover:bg-red-50"
+                    >
+                      <XCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                      <span className="hidden sm:inline">Delete</span>
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>
@@ -445,6 +475,39 @@ export function OrderTable({
         </div>
       )}
     </div>
+
+    {/* Delete Confirmation Dialog */}
+    <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Trash2 className="h-5 w-5 text-red-600" />
+            Delete Order
+          </DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete this order? This action cannot be undone and will permanently remove the order from your database.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="flex flex-col sm:flex-row gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setShowDeleteDialog(false)}
+            className="w-full sm:w-auto"
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={handleConfirmDelete}
+            disabled={sendingOrders}
+            className="w-full sm:w-auto"
+          >
+            {sendingOrders ? 'Deleting...' : 'Delete Order'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </>
   )
 }
 

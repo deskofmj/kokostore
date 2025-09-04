@@ -1,11 +1,11 @@
-# Shopify Droppex Fulfillment System
+# Koko Store First Delivery Fulfillment System
 
-A comprehensive order fulfillment system that integrates Shopify with the Droppex delivery service. Built with Next.js 15, TypeScript, Tailwind CSS, and Supabase.
+A comprehensive order fulfillment system that integrates Shopify with the First Delivery service. Built with Next.js 15, TypeScript, Tailwind CSS, and Supabase.
 
 ## Features
 
-- **Shopify Integration**: Fetch and sync orders from your Shopify store
-- **Droppex Integration**: ✅ **COMPLETED** - Send orders to Droppex for fulfillment
+- **Shopify Integration**: Fetch and sync orders from your Shopify store via webhooks
+- **First Delivery Integration**: ✅ **COMPLETED** - Send orders to First Delivery for fulfillment
 - **Order Management**: Modern UI for managing orders with search and filtering
 - **Real-time Updates**: Webhook support for live order updates
 - **Authentication**: Basic hardcoded authentication system
@@ -25,8 +25,8 @@ A comprehensive order fulfillment system that integrates Shopify with the Droppe
 - Node.js 18+ 
 - npm or yarn
 - Supabase account
-- Shopify store with API access
-- ~~Droppex API credentials~~ ✅ **Already configured**
+- Shopify store with webhook access
+- First Delivery API credentials
 
 ## Setup Instructions
 
@@ -34,7 +34,7 @@ A comprehensive order fulfillment system that integrates Shopify with the Droppe
 
 ```bash
 git clone <repository-url>
-cd shopify-droppex-fulfillment
+cd koko-store-fulfillment
 npm install
 ```
 
@@ -50,15 +50,14 @@ SHOPIFY_WEBHOOK_SECRET=your_webhook_secret
 SUPABASE_URL=your_supabase_url
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
-# Authentication (optional - defaults to admin/admin123)
+# First Delivery Configuration
+FIRST_DELIVERY_BASE_URL=https://api.firstdelivery.com
+FIRST_DELIVERY_TOKEN=your_first_delivery_token
+
+# Authentication (optional - defaults to admin/admin)
 NEXT_PUBLIC_ADMIN_USERNAME=admin
 NEXT_PUBLIC_ADMIN_PASSWORD=your_secure_password
 ```
-
-**Note**: 
-- Droppex API credentials are configured via environment variables
-- **Production Environment**: The system is configured to use only the production Droppex environment for all operations
-- Toast notifications provide real-time feedback for all user actions including success, error, warning, and info messages
 
 ### 3. Database Setup
 
@@ -66,7 +65,7 @@ Create a new Supabase project and run the following SQL to create the orders tab
 
 ```sql
 -- Orders table
-CREATE TABLE orders (
+CREATE TABLE kokostore_orders (
   id BIGINT PRIMARY KEY,
   name VARCHAR,
   email VARCHAR,
@@ -81,7 +80,7 @@ CREATE TABLE orders (
   note TEXT,
   customer JSONB,
   parcel_status VARCHAR DEFAULT 'Not sent',
-  droppex_response JSONB,
+  first_delivery_response JSONB,
   created_at_db TIMESTAMP DEFAULT NOW()
 );
 ```
@@ -118,7 +117,7 @@ Visit `http://localhost:3000` to access the application.
 - **GET**: Fetch orders from Shopify and sync with database
 
 ### `/api/send-to-carrier`
-- **POST**: Send selected orders to Droppex
+- **POST**: Send selected orders to First Delivery
 - Body: `{ orderIds: number[] }`
 
 ### `/api/shopify-webhook`
@@ -128,44 +127,52 @@ Visit `http://localhost:3000` to access the application.
 - **POST**: Revert order status to "Not sent"
 - Body: `{ orderId: number }`
 
-### `/api/droppex-status`
-- **GET**: Check Droppex API connection status for both dev and prod environments
-- Returns connection status and error messages for each environment
+### `/api/first-delivery-status`
+- **GET**: Check First Delivery API connection status
+
+### `/api/verify-first-delivery-order`
+- **POST**: Verify order status in First Delivery
+- Body: `{ trackingNumber: string }`
+
+### `/api/test-first-delivery-mapping`
+- **POST**: Test order mapping to First Delivery format
+- Body: `{ orderId: number }`
 
 ## Authentication
 
 The system uses basic hardcoded authentication:
 - Username: `admin` (or set via `NEXT_PUBLIC_ADMIN_USERNAME`)
-- Password: `admin123` (or set via `NEXT_PUBLIC_ADMIN_PASSWORD`)
+- Password: `admin` (or set via `NEXT_PUBLIC_ADMIN_PASSWORD`)
 
 ## Order Status
 
 Orders can have the following parcel statuses:
-- **Not sent**: Order is ready to be sent to Droppex
-- **Sent to Droppex**: Order has been successfully sent to Droppex
-- **Failed**: Order failed to send to Droppex
+- **Not sent**: Order is ready to be sent to First Delivery
+- **Sent to First Delivery**: Order has been successfully sent to First Delivery
+- **Failed**: Order failed to send to First Delivery
 
 ## Features
 
 ### Order Management
 - View all orders in a responsive table
-- Search orders by name or email
-- Filter orders by status
+- Search orders by name, email, phone, address, or city
+- Filter orders by status (New, Sent, Failed)
 - Bulk select orders for batch operations
 - View detailed order information in a modal
+- Data quality indicators and validation
 
 ### API Status Monitoring
-- Real-time Droppex API connection status for both dev and prod environments
+- Real-time First Delivery API connection status
 - Visual indicators (green wifi icon = connected, red wifi-off icon = disconnected)
 - Hover tooltips showing connection details and error messages
 - Automatic status checking on page load and refresh
 
-### Droppex Integration ✅ **COMPLETED**
-- Send individual orders to Droppex
-- Bulk send multiple orders
+### First Delivery Integration ✅ **COMPLETED**
+- Send individual orders to First Delivery
+- Bulk send multiple orders (up to 100 at once)
 - Track success/failure status
-- Store Droppex responses for debugging
-- Automatic environment switching (dev/prod)
+- Store First Delivery responses for debugging
+- Rate limiting compliance (1 req/sec for single, 2 req/10sec for bulk)
 - Proper error handling and response parsing
 
 ### Real-time Updates
@@ -182,13 +189,23 @@ src/
 │   │   ├── shopify-orders/route.ts
 │   │   ├── send-to-carrier/route.ts
 │   │   ├── shopify-webhook/route.ts
-│   │   └── revert-order/route.ts
+│   │   ├── revert-order/route.ts
+│   │   ├── first-delivery-status/route.ts
+│   │   ├── verify-first-delivery-order/route.ts
+│   │   └── test-first-delivery-mapping/route.ts
 │   ├── login/page.tsx
 │   ├── page.tsx
 │   ├── layout.tsx
 │   └── globals.css
 ├── components/
 │   ├── auth-provider.tsx
+│   ├── dashboard/
+│   │   ├── order-table.tsx
+│   │   ├── status-indicators.tsx
+│   │   ├── data-quality-indicator.tsx
+│   │   ├── header-actions.tsx
+│   │   └── search-filters.tsx
+│   ├── verification-modal.tsx
 │   └── ui/
 │       ├── button.tsx
 │       ├── table.tsx
@@ -196,9 +213,10 @@ src/
 │       ├── input.tsx
 │       └── badge.tsx
 └── lib/
-    ├── droppex.ts                       # ✅ COMPLETED
+    ├── first-delivery.ts              # ✅ COMPLETED
     ├── shopify.ts
     ├── supabase.ts
+    ├── data-mapping.ts
     └── utils.ts
 ```
 
@@ -206,49 +224,66 @@ src/
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `SHOPIFY_DOMAIN` | Your Shopify store domain | Yes |
-| `SHOPIFY_ACCESS_TOKEN` | Shopify API access token | Yes |
 | `SHOPIFY_WEBHOOK_SECRET` | Shopify webhook secret | Yes |
 | `SUPABASE_URL` | Supabase project URL | Yes |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key | Yes |
+| `FIRST_DELIVERY_BASE_URL` | First Delivery API base URL | Yes |
+| `FIRST_DELIVERY_TOKEN` | First Delivery API token | Yes |
 | `NEXT_PUBLIC_ADMIN_USERNAME` | Admin username | No (default: admin) |
-| `NEXT_PUBLIC_ADMIN_PASSWORD` | Admin password | No (default: admin123) |
+| `NEXT_PUBLIC_ADMIN_PASSWORD` | Admin password | No (default: admin) |
 
-**Note**: Droppex API credentials are hardcoded and automatically switch between dev/prod environments.
+## First Delivery API Details
+
+The system integrates with First Delivery API using:
+
+### Authentication
+- **Type**: Bearer token
+- **Header**: `Authorization: Bearer {token}`
+
+### Endpoints
+- **POST** `/create` - Add single order
+- **POST** `/bulk-create` - Add multiple orders (max 100)
+- **POST** `/etat` - Check order status
+- **POST** `/filter` - Filter orders with pagination
+
+### Rate Limiting
+- **Single orders**: 1 request per second
+- **Bulk orders**: 2 requests every 10 seconds
+
+### Order Format
+```json
+{
+  "Client": {
+    "nom": "customer name",
+    "gouvernerat": "governorate",
+    "ville": "city",
+    "adresse": "address",
+    "telephone": "phone",
+    "telephone2": "phone2"
+  },
+  "Produit": {
+    "article": "article",
+    "prix": 40,
+    "designation": "product description",
+    "nombreArticle": 2,
+    "commentaire": "comment",
+    "nombreEchange": 0
+  }
+}
+```
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Orders not loading**: Check Shopify API credentials and permissions
-2. **Droppex integration failing**: Check network connectivity and API endpoints
+1. **Orders not loading**: Check Shopify webhook configuration
+2. **First Delivery integration failing**: Check API token and base URL
 3. **Database errors**: Ensure Supabase connection and table schema
 4. **Authentication issues**: Check environment variables for username/password
 
 ### Debug Mode
 
 Enable debug logging by adding `DEBUG=true` to your environment variables.
-
-## Droppex API Details
-
-The system is configured with the following Droppex API endpoints:
-
-### Development Environment
-- **URL**: `https://apidev.droppex.delivery/api_droppex_post`
-- **Code_API**: `582`
-- **Cle_API**: `5VnhlnchEpIglis9nBra`
-
-### Production Environment
-- **URL**: `https://droppex.delivery/api_droppex_post`
-- **Code_API**: `1044`
-- **Cle_API**: `LEyMmMrLtmva65it2dOU`
-
-### API Operations
-- **Create Package**: `action=add`
-- **Get Package**: `action=get`
-- **List Packages**: `action=list`
-- **Update Package**: `action=update`
-- **Delete Package**: `action=delete`
 
 ## Contributing
 
@@ -266,6 +301,10 @@ This project is licensed under the MIT License.
 
 For support or questions:
 1. Check the troubleshooting section
-2. Review the API documentation
+2. Review the First Delivery API documentation
 3. Test the integration locally
-4. Contact support with specific error messages 
+4. Contact support with specific error messages
+
+---
+
+**Status**: ✅ **COMPLETE** - First Delivery integration is fully implemented and ready for production use. 

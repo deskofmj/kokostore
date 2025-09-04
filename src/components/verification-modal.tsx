@@ -47,7 +47,7 @@ interface VerificationModalProps {
   isOpen: boolean
   onClose: () => void
   orders: Order[]
-  onSendToDroppex: (orderIds: number[]) => Promise<void>
+  onSendToFirstDelivery: (orderIds: number[]) => Promise<void>
   sendingOrders: boolean
 }
 
@@ -55,7 +55,7 @@ export function VerificationModal({
   isOpen, 
   onClose, 
   orders, 
-  onSendToDroppex, 
+  onSendToFirstDelivery, 
   sendingOrders 
 }: VerificationModalProps) {
   const [editableOrders, setEditableOrders] = useState<EditableOrder[]>([])
@@ -193,7 +193,7 @@ export function VerificationModal({
       errors.push('Customer name is required')
     }
     
-    // Email validation - optional since Droppex doesn't require it
+    // Email validation - optional since First Delivery doesn't require it
     const email = (customer?.email as string) || order.email
     if (email?.trim()) {
       // Only validate format if email is provided
@@ -202,7 +202,7 @@ export function VerificationModal({
         errors.push('Invalid email format')
       }
     }
-    // No error if email is missing - it's optional for Droppex
+            // No error if email is missing - it's optional for First Delivery
     
     // Phone validation - be more flexible
     const phone = (customer?.phone as string) || (shipping?.phone as string) || (order.customer?.phone as string)
@@ -236,14 +236,14 @@ export function VerificationModal({
     
     const zipCode = (shipping?.zip as string) || (order.shipping_address?.zip as string)
     if (!zipCode?.trim()) {
-      // Don't error, just warn - ZIP code is optional for Droppex
-      console.warn(`No ZIP code provided for order ${order.id}, will send empty to Droppex`)
+      // Don't error, just warn - ZIP code is optional for First Delivery
+      console.warn(`No ZIP code provided for order ${order.id}, will send empty to First Delivery`)
     }
 
     return errors
   }
 
-  const handleSendToDroppex = async () => {
+  const handleSendToFirstDelivery = async () => {
     // Validate all orders before sending - but be more lenient
     const allErrors: Record<number, string[]> = {}
     let hasCriticalErrors = false
@@ -310,7 +310,7 @@ export function VerificationModal({
       return
     }
 
-    await onSendToDroppex(orders.map(o => o.id))
+    await onSendToFirstDelivery(orders.map(o => o.id))
     onClose()
   }
 
@@ -326,7 +326,7 @@ export function VerificationModal({
             <div className="bg-black p-2 rounded-lg">
               <Package className="h-6 w-6 text-white" />
             </div>
-            <span>Review & Send to Droppex</span>
+            <span>Review & Send to First Delivery</span>
           </DialogTitle>
         </DialogHeader>
 
@@ -343,7 +343,7 @@ export function VerificationModal({
                     <span className="text-lg font-bold text-gray-900">
                       {orders.length} order{orders.length !== 1 ? 's' : ''} selected
                     </span>
-                    <p className="text-sm text-gray-600">Ready to send to Droppex</p>
+                    <p className="text-sm text-gray-600">Ready to send to First Delivery</p>
                   </div>
                 </div>
                 <div className="bg-white rounded-lg px-4 py-2 border border-gray-200">
@@ -623,7 +623,7 @@ export function VerificationModal({
                   <Send className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-700">Ready to send to Droppex</p>
+                  <p className="text-sm font-medium text-gray-700">Ready to send to First Delivery</p>
                   <p className="text-xs text-gray-500">Review all information before sending</p>
                 </div>
               </div>
@@ -636,19 +636,19 @@ export function VerificationModal({
                   Cancel
                 </Button>
                 <Button
-                  onClick={handleSendToDroppex}
+                  onClick={handleSendToFirstDelivery}
                   disabled={sendingOrders}
                   className="bg-black hover:bg-gray-800 text-white font-semibold px-6 py-2"
                 >
                   {sendingOrders ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Sending to Droppex...
+                      Sending to First Delivery...
                     </>
                   ) : (
                     <>
                       <Send className="h-4 w-4 mr-2" />
-                      Send to Droppex
+                      Send to First Delivery
                     </>
                   )}
                 </Button>

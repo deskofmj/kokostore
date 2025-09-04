@@ -1,31 +1,26 @@
-// Runtime environment variable validation
-export function validateEnv() {
-  const required = {
-    SUPABASE_URL: process.env.SUPABASE_URL,
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
-    SHOPIFY_DOMAIN: process.env.SHOPIFY_DOMAIN,
-    SHOPIFY_ACCESS_TOKEN: process.env.SHOPIFY_ACCESS_TOKEN,
-    // Droppex environment variables are optional with defaults
-    DROPPEX_DEV_URL: process.env.DROPPEX_DEV_URL,
-    DROPPEX_DEV_CODE_API: process.env.DROPPEX_DEV_CODE_API,
-    DROPPEX_DEV_CLE_API: process.env.DROPPEX_DEV_CLE_API,
-    DROPPEX_PROD_URL: process.env.DROPPEX_PROD_URL,
-    DROPPEX_PROD_CODE_API: process.env.DROPPEX_PROD_CODE_API,
-    DROPPEX_PROD_CLE_API: process.env.DROPPEX_PROD_CLE_API,
-  }
+export const env = {
+  // Shopify environment variables
+  SHOPIFY_SHOP_DOMAIN: process.env.SHOPIFY_SHOP_DOMAIN,
+  SHOPIFY_ACCESS_TOKEN: process.env.SHOPIFY_ACCESS_TOKEN,
+  SHOPIFY_WEBHOOK_SECRET: process.env.SHOPIFY_WEBHOOK_SECRET,
 
-  const missing = Object.entries(required)
-    .filter(([, value]) => !value)
-    .map(([key]) => key)
+  // Supabase environment variables
+  SUPABASE_URL: process.env.SUPABASE_URL,
+  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
 
-  if (missing.length > 0) {
-    throw new Error(`Missing required environment variables: ${missing.join(', ')}`)
-  }
+  // First Delivery environment variables
+  FIRST_DELIVERY_BASE_URL: process.env.FIRST_DELIVERY_BASE_URL,
+  FIRST_DELIVERY_TOKEN: process.env.FIRST_DELIVERY_TOKEN,
 
-  return required
-}
+  // Authentication environment variables
+  NEXT_PUBLIC_ADMIN_USERNAME: process.env.NEXT_PUBLIC_ADMIN_USERNAME || 'admin',
+  NEXT_PUBLIC_ADMIN_PASSWORD: process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin',
 
-// Get environment variables with validation
-export function getEnv() {
-  return validateEnv()
+  // App environment variables
+  NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+  NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'http://localhost:3000',
+
+  // Environment
+  NODE_ENV: process.env.NODE_ENV || 'development',
+  DEBUG: process.env.DEBUG === 'true',
 } 

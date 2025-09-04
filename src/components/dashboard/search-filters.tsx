@@ -59,7 +59,7 @@ export function SearchFilters({
                   className="bg-black hover:bg-gray-800 text-white font-medium h-10 sm:h-12 px-4 sm:px-6 text-sm"
                 >
                   <Send className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Send {selectedOrdersCount} to Droppex</span>
+                  <span className="hidden sm:inline">Send {selectedOrdersCount} to First Delivery</span>
                   <span className="sm:hidden">Send {selectedOrdersCount}</span>
                 </Button>
                 <Button

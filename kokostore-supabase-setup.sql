@@ -1,5 +1,5 @@
--- Koko Store First Delivery Fulfillment System Database Setup
--- This file creates the necessary database structure for the Koko Store First Delivery fulfillment system
+-- Koko Store First Delivery Fulfillment System - Supabase Setup
+-- Run this SQL in your Supabase SQL Editor
 
 -- Create the orders table
 CREATE TABLE IF NOT EXISTS kokostore_orders (
@@ -50,8 +50,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create a trigger to automatically update created_at_db
-CREATE TRIGGER update_salmacollection_created_at_db
-  BEFORE INSERT ON salmacollection
+-- Create trigger to automatically update created_at_db
+CREATE TRIGGER update_kokostore_orders_created_at_db
+  BEFORE INSERT ON kokostore_orders
   FOR EACH ROW
-  EXECUTE FUNCTION update_created_at_db(); 
+  EXECUTE FUNCTION update_created_at_db();
+
+-- Verify the table was created successfully
+SELECT 
+  table_name, 
+  column_name, 
+  data_type, 
+  is_nullable,
+  column_default
+FROM information_schema.columns 
+WHERE table_name = 'kokostore_orders' 
+ORDER BY ordinal_position;

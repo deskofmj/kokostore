@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getOrders, updateOrderStatus, clearUpdatedInShopifyFlag } from '@/lib/supabase'
-import { sendOrderToDroppex } from '@/lib/droppex'
+import { sendOrderToFirstDelivery } from '@/lib/first-delivery'
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,24 +22,24 @@ export async function POST(request: NextRequest) {
       if (order.parcel_status === 'Not sent' || order.parcel_status === 'Failed') {
         try {
     
-          const droppexResponse = await sendOrderToDroppex(order)
+          const firstDeliveryResponse = await sendOrderToFirstDelivery(order)
           
           
-          if (droppexResponse.success) {
-            await updateOrderStatus(order.id, 'Sent to Droppex', droppexResponse as unknown as Record<string, unknown>)
-            // Clear the "Updated in Shopify" flag when order is sent to Droppex
+          if (firstDeliveryResponse.success) {
+            await updateOrderStatus(order.id, 'Sent to First Delivery', firstDeliveryResponse as unknown as Record<string, unknown>)
+            // Clear the "Updated in Shopify" flag when order is sent to First Delivery
             await clearUpdatedInShopifyFlag(order.id)
             results.push({
               orderId: order.id,
               success: true,
-              trackingNumber: droppexResponse.tracking_number
+              trackingNumber: firstDeliveryResponse.tracking_number
             })
           } else {
-            await updateOrderStatus(order.id, 'Failed', droppexResponse as unknown as Record<string, unknown>)
+            await updateOrderStatus(order.id, 'Failed', firstDeliveryResponse as unknown as Record<string, unknown>)
             results.push({
               orderId: order.id,
               success: false,
-              error: droppexResponse.error_message
+              error: firstDeliveryResponse.error_message
             })
           }
                   } catch (error) {

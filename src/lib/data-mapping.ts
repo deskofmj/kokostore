@@ -8,7 +8,7 @@ export interface DataMappingResult {
   warnings: string[]
 }
 
-export interface DroppexMappingValidation {
+export interface FirstDeliveryMappingValidation {
   isValid: boolean
   errors: string[]
   warnings: string[]
@@ -32,7 +32,7 @@ export function validateShopifyToSupabase(shopifyOrder: Record<string, unknown>)
   }
   
   if (!shopifyOrder.email) {
-    warnings.push('No customer email provided (optional for Droppex)')
+    warnings.push('No customer email provided (optional for First Delivery)')
   }
   
   // Price validation
@@ -97,9 +97,9 @@ export function validateShopifyToSupabase(shopifyOrder: Record<string, unknown>)
 }
 
 /**
- * Validates and maps order data to Droppex format
+ * Validates and maps order data to First Delivery format
  */
-export function validateOrderForDroppex(order: Order): DroppexMappingValidation {
+export function validateOrderForFirstDelivery(order: Order): FirstDeliveryMappingValidation {
   const errors: string[] = []
   const warnings: string[] = []
   
@@ -447,18 +447,17 @@ export function validateOrderForDroppex(order: Order): DroppexMappingValidation 
     : libelleContent
 
   const mappedData = {
-    action: 'add',
-    tel_l: phone,
-    nom_client: customerName,
-    gov_l: order.shipping_address?.city || '', // Use city name in governorate field
-    cp_l: zipCode || '',  // Leave empty when missing (no default)
-    cod: (order.total_price || 0).toFixed(2),  // Price field
-    libelle: libelleContent,
-    nb_piece: (order.line_items?.length || 1).toString(),
-    adresse_l: getFullAddress(), // Use full address (address1 + address2)
-    remarque: remarqueContent,
-    tel2_l: phone,  // Same as primary phone for now
-    service: 'Livraison'
+    nom: customerName,
+    gouvernerat: order.shipping_address?.province || detectedGovernorate || 'Tunis',
+    ville: order.shipping_address?.city || '',
+    adresse: getFullAddress(), // Use full address (address1 + address2)
+    telephone: phone,
+    telephone2: phone,  // Same as primary phone for now
+    article: order.name || 'Order',
+    prix: order.total_price || 0,
+    designation: libelleContent,
+    nombreArticle: order.line_items?.length || 1,
+    commentaire: remarqueContent
   }
   
   return {
@@ -473,7 +472,7 @@ export function validateOrderForDroppex(order: Order): DroppexMappingValidation 
  * Formats order data for display with proper validation
  */
 export function formatOrderForDisplay(order: Order) {
-  const validation = validateOrderForDroppex(order)
+  const validation = validateOrderForFirstDelivery(order)
   
   return {
     order,

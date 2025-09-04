@@ -24,7 +24,7 @@ export default function Dashboard() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center">
-                <img src="/logo.svg" alt="Salma Collection" className="h-8 w-8 sm:h-10 sm:w-10" />
+                <img src="/logo.svg" alt="Koko Store" className="h-8 w-8 sm:h-10 sm:w-10" />
               </div>
               
               <div className="flex items-center space-x-3">
@@ -90,7 +90,7 @@ export default function Dashboard() {
             searchTerm={dashboard.searchTerm}
             onSearchChange={dashboard.setSearchTerm}
             selectedOrdersCount={dashboard.selectedOrders.length}
-            onSendSelected={() => dashboard.handlePrepareForDroppex(dashboard.selectedOrders)}
+                            onSendSelected={() => dashboard.handlePrepareForFirstDelivery(dashboard.selectedOrders)}
             onDeleteSelected={() => dashboard.handleDeleteOrders(dashboard.selectedOrders)}
             sendingOrders={dashboard.sendingOrders}
           />
@@ -194,7 +194,7 @@ export default function Dashboard() {
           isOpen={dashboard.showVerificationModal}
           onClose={() => dashboard.setShowVerificationModal(false)}
           orders={dashboard.ordersToSend}
-          onSendToDroppex={dashboard.handleSendToDroppex}
+          onSendToFirstDelivery={dashboard.handleSendToFirstDelivery}
           sendingOrders={dashboard.sendingOrders}
         />
 
@@ -205,10 +205,10 @@ export default function Dashboard() {
               {/* Left side - Brand */}
               <div className="flex items-center space-x-2 sm:space-x-3">
                 <div>
-                  <img src="/logo.svg" alt="Salma Collection" className="h-5 w-5 sm:h-6 sm:w-6" />
+                  <img src="/logo.svg" alt="Koko Store" className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
                 <div>
-                  <h3 className="text-base sm:text-lg font-bold text-gray-900">Salma Collection</h3>
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900">Koko Store</h3>
                   <p className="text-xs sm:text-sm text-gray-500">Professional Order Management</p>
                 </div>
               </div>
@@ -216,7 +216,7 @@ export default function Dashboard() {
               {/* Center - Copyright */}
               <div className="text-center">
                 <p className="text-xs sm:text-sm text-gray-500">
-                  © 2025 Salma Collection. All rights reserved.
+                  © 2025 Koko Store. All rights reserved.
                 </p>
               </div>
               

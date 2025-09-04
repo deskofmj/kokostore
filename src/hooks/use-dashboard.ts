@@ -74,7 +74,7 @@ export function useDashboard() {
   }
 
   // Order Management Functions
-  const handleSendToDroppex = async (orderIds: number[]) => {
+  const handleSendToFirstDelivery = async (orderIds: number[]) => {
     setSendingOrders(true)
     try {
       const response = await fetch('/api/send-to-carrier', {
@@ -92,29 +92,29 @@ export function useDashboard() {
         
         if (data.success) {
           toast({
-            title: 'Orders sent to Droppex',
-            description: `Successfully sent ${orderIds.length} orders to Droppex.`,
+            title: 'Orders sent to First Delivery',
+            description: `Successfully sent ${orderIds.length} orders to First Delivery.`,
             variant: 'success',
           })
         } else {
           toast({
-            title: 'Failed to send orders to Droppex',
-            description: 'Failed to send orders to Droppex. Please try again.',
+            title: 'Failed to send orders to First Delivery',
+            description: 'Failed to send orders to First Delivery. Please try again.',
             variant: 'destructive',
           })
         }
       } else {
         toast({
-          title: 'Network error sending orders to Droppex',
-          description: 'Failed to send orders to Droppex. Please try again.',
+                  title: 'Network error sending orders to First Delivery',
+        description: 'Failed to send orders to First Delivery. Please try again.',
           variant: 'destructive',
         })
       }
     } catch (error) {
-      console.error('Error sending orders to Droppex:', error)
+      console.error('Error sending orders to First Delivery:', error)
       toast({
-        title: 'Error sending orders to Droppex',
-        description: 'Failed to send orders to Droppex. Please try again.',
+        title: 'Error sending orders to First Delivery',
+        description: 'Failed to send orders to First Delivery. Please try again.',
         variant: 'destructive',
       })
     } finally {
@@ -122,12 +122,12 @@ export function useDashboard() {
     }
   }
 
-  const handlePrepareForDroppex = (orderIds: number[]) => {
+  const handlePrepareForFirstDelivery = (orderIds: number[]) => {
     const selectedOrders = orders.filter(order => orderIds.includes(order.id))
     setOrdersToSend(selectedOrders)
     setShowVerificationModal(true)
     toast({
-      title: 'Preparing orders for Droppex',
+      title: 'Preparing orders for First Delivery',
       description: `Preparing ${selectedOrders.length} orders for verification...`,
       variant: 'info',
     })
@@ -264,10 +264,10 @@ export function useDashboard() {
   const handleSendOrder = (orderId: number) => {
     const order = orders.find(o => o.id === orderId)
     if (order) {
-      handlePrepareForDroppex([orderId])
+      handlePrepareForFirstDelivery([orderId])
       toast({
         title: 'Preparing to send order',
-        description: `Preparing to send order ${order.name} to Droppex...`,
+        description: `Preparing to send order ${order.name} to First Delivery...`,
         variant: 'info',
       })
     } else {
@@ -330,7 +330,7 @@ export function useDashboard() {
       case 'new':
         return filtered.filter(o => o.parcel_status === 'Not sent')
       case 'sent':
-        return filtered.filter(o => o.parcel_status === 'Sent to Droppex')
+        return filtered.filter(o => o.parcel_status === 'Sent to First Delivery')
       case 'failed':
         return filtered.filter(o => o.parcel_status === 'Failed')
       default:
@@ -342,7 +342,7 @@ export function useDashboard() {
   const orderStats = {
     total: orders.filter(o => o.parcel_status === 'Not sent').length, // Show only new orders
     notSent: orders.filter(o => o.parcel_status === 'Not sent').length,
-    sent: orders.filter(o => o.parcel_status === 'Sent to Droppex').length,
+    sent: orders.filter(o => o.parcel_status === 'Sent to First Delivery').length,
     failed: orders.filter(o => o.parcel_status === 'Failed').length,
   }
 
@@ -387,8 +387,8 @@ export function useDashboard() {
 
     // Functions
     fetchOrders,
-    handleSendToDroppex,
-    handlePrepareForDroppex,
+    handleSendToFirstDelivery,
+    handlePrepareForFirstDelivery,
     handleRetryFailedOrder,
     handleRevertOrder,
     handleDeleteOrders,

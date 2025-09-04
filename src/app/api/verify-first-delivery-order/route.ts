@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDroppexPackage } from '@/lib/droppex'
+import { getFirstDeliveryOrderStatus } from '@/lib/first-delivery'
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,24 +12,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // console.log(`Verifying Droppex order with tracking number: ${trackingNumber}`)
+    // console.log(`Verifying First Delivery order with tracking number: ${trackingNumber}`)
     
-    const droppexResponse = await getDroppexPackage(trackingNumber)
+    const firstDeliveryResponse = await getFirstDeliveryOrderStatus(trackingNumber)
     
     return NextResponse.json({
       success: true,
       trackingNumber,
-      droppexResponse,
-      exists: droppexResponse.success && droppexResponse.tracking_number
+      firstDeliveryResponse,
+      exists: firstDeliveryResponse.success && firstDeliveryResponse.status
     })
   } catch (error) {
-    console.error('Error verifying Droppex order:', error)
+    console.error('Error verifying First Delivery order:', error)
     return NextResponse.json(
       { 
-        error: 'Failed to verify Droppex order',
+        error: 'Failed to verify First Delivery order',
         details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     )
   }
-} 
+}

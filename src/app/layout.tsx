@@ -11,20 +11,20 @@ const redHatText = Red_Hat_Text({
 })
 
 export const metadata: Metadata = {
-  title: 'Salma Collection - Order Management',
-  description: 'Professional order fulfillment and management system for Salma Collection. Streamline your Shopify orders, track shipments, and manage customer deliveries with our integrated Droppex fulfillment platform.',
+  title: 'Koko Store - Order Management',
+  description: 'Professional order fulfillment and management system for Koko Store. Streamline your Shopify orders, track shipments, and manage customer deliveries with our integrated First Delivery fulfillment platform.',
   icons: {
     icon: '/Favicon.png',
   },
   openGraph: {
-    title: 'Salma Collection - Order Management',
-    description: 'Professional order fulfillment and management system for Salma Collection. Streamline your Shopify orders, track shipments, and manage customer deliveries with our integrated Droppex fulfillment platform.',
+    title: 'Koko Store - Order Management',
+    description: 'Professional order fulfillment and management system for Koko Store. Streamline your Shopify orders, track shipments, and manage customer deliveries with our integrated First Delivery fulfillment platform.',
     images: [
       {
         url: '/compressed-opengraph.webp',
         width: 1200,
         height: 630,
-        alt: 'Salma Collection Order Management System',
+        alt: 'Koko Store Order Management System',
       },
     ],
     type: 'website',
@@ -32,8 +32,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Salma Collection - Order Management',
-    description: 'Professional order fulfillment and management system for Salma Collection. Streamline your Shopify orders, track shipments, and manage customer deliveries with our integrated Droppex fulfillment platform.',
+    title: 'Koko Store - Order Management',
+    description: 'Professional order fulfillment and management system for Koko Store. Streamline your Shopify orders, track shipments, and manage customer deliveries with our integrated First Delivery fulfillment platform.',
     images: ['/compressed-opengraph.webp'],
   },
 }

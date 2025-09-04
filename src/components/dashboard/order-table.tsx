@@ -230,13 +230,13 @@ export function OrderTable({
   const getStatusBadge = (status: Order['parcel_status']) => {
     const variants = {
       'Not sent': 'secondary',
-      'Sent to Droppex': 'default',
+              'Sent to First Delivery': 'default',
       'Failed': 'destructive',
     } as const
 
     const shortLabels = {
       'Not sent': 'New',
-      'Sent to Droppex': 'Sent',
+              'Sent to First Delivery': 'Sent',
       'Failed': 'Failed',
     } as const
 
@@ -442,7 +442,7 @@ export function OrderTable({
                       </Button>
                     )}
 
-                    {order.parcel_status === 'Sent to Droppex' && (
+                    {order.parcel_status === 'Sent to First Delivery' && (
                       <Button
                         variant="outline"
                         size="sm"
@@ -629,7 +629,7 @@ function OrderDetails({
             </div>
             <div className="flex justify-between items-center">
               <p className="text-sm font-medium text-gray-500">Status</p>
-              <Badge variant={order.parcel_status === 'Failed' ? 'destructive' : order.parcel_status === 'Sent to Droppex' ? 'default' : 'secondary'}>
+              <Badge variant={order.parcel_status === 'Failed' ? 'destructive' : order.parcel_status === 'Sent to First Delivery' ? 'default' : 'secondary'}>
                 {order.parcel_status}
               </Badge>
             </div>
@@ -746,7 +746,7 @@ function OrderDetails({
               className="bg-black hover:bg-gray-800 text-white"
             >
               <Send className="h-4 w-4 mr-2" />
-              {sendingOrders ? 'Sending...' : 'Send to Droppex'}
+              {sendingOrders ? 'Sending...' : 'Send to First Delivery'}
             </Button>
           )}
           {order.parcel_status === 'Failed' && (
@@ -759,7 +759,7 @@ function OrderDetails({
               {sendingOrders ? 'Retrying...' : 'Retry'}
             </Button>
           )}
-          {order.parcel_status === 'Sent to Droppex' && (
+          {order.parcel_status === 'Sent to First Delivery' && (
             <Button
               onClick={() => onRevertOrder(order)}
               disabled={sendingOrders}

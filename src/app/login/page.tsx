@@ -72,11 +72,11 @@ export default function LoginPage() {
               <CardHeader className="space-y-1 pb-4 sm:pb-6">
                 <div className="flex items-center justify-center mb-4 sm:mb-6">
                   <div>
-                    <img src="/logo.svg" alt="Salma Collection" className="h-6 w-6 sm:h-8 sm:w-8" />
+                    <img src="/logo.svg" alt="Koko Store" className="h-6 w-6 sm:h-8 sm:w-8" />
                   </div>
                 </div>
                 <CardTitle className="text-xl sm:text-2xl font-bold text-center text-slate-900">
-                  Welcome to Salma Collection
+                  Welcome to Koko Store
                 </CardTitle>
                 <CardDescription className="text-center text-xs sm:text-sm text-slate-600">
                   Sign in to your order management system
@@ -160,7 +160,7 @@ export default function LoginPage() {
             <Separator />
             <div className="text-center">
               <p className="text-xs text-slate-500">
-                Secure authentication powered by Salma Collection
+                Secure authentication powered by Koko Store
               </p>
             </div>
           </CardFooter>

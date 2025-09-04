@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sendOrderToDroppex } from '@/lib/droppex'
+import { sendOrderToFirstDelivery } from '@/lib/first-delivery'
 import { getSupabaseClient } from '@/lib/supabase'
-import { validateOrderForDroppex } from '@/lib/data-mapping'
+import { validateOrderForFirstDelivery } from '@/lib/data-mapping'
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     // Get the order from Supabase
     const supabase = getSupabaseClient()
     const { data: order, error } = await supabase
-      .from('salmacollection')
+      .from('kokostore_orders')
       .select('*')
       .eq('id', orderId)
       .single()
@@ -29,13 +29,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get the mapped data to show what's being sent to Droppex
-    const validation = validateOrderForDroppex(order)
+    // Get the mapped data to show what's being sent to First Delivery
+    const validation = validateOrderForFirstDelivery(order)
     
-    // Testing Droppex mapping for order
+    // Testing First Delivery mapping for order
 
-    // Send to Droppex
-    const droppexResponse = await sendOrderToDroppex(order)
+    // Send to First Delivery
+    const firstDeliveryResponse = await sendOrderToFirstDelivery(order)
     
     return NextResponse.json({
       success: true,
@@ -51,15 +51,15 @@ export async function POST(request: NextRequest) {
         customerName: order.shipping_address?.name,
         phone: order.shipping_address?.phone
       },
-      droppexMappedData: validation.mappedData,
-      droppexResponse,
+      firstDeliveryMappedData: validation.mappedData,
+      firstDeliveryResponse,
       timestamp: new Date().toISOString()
     })
   } catch (error) {
-    console.error('Error testing Droppex mapping:', error)
+    console.error('Error testing First Delivery mapping:', error)
     return NextResponse.json(
       { 
-        error: 'Failed to test Droppex mapping',
+        error: 'Failed to test First Delivery mapping',
         details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }

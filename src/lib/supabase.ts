@@ -14,8 +14,8 @@ export interface Order {
   financial_status: string
   note: string
   customer: Record<string, unknown> | null
-  parcel_status: 'Not sent' | 'Sent to Droppex' | 'Failed'
-  droppex_response?: Record<string, unknown> | null
+  parcel_status: 'Not sent' | 'Sent to First Delivery' | 'Failed'
+  first_delivery_response?: Record<string, unknown> | null
   created_at_db?: string
   updated_at?: string
   updated_in_shopify?: boolean
@@ -46,7 +46,7 @@ export async function getOrders() {
   const supabase = getSupabaseClient()
   
   const { data, error } = await supabase
-    .from('salmacollection')
+    .from('kokostore_orders')
     .select('*')
     .order('created_at_db', { ascending: false })
 
@@ -72,12 +72,12 @@ export async function getOrders() {
     parcel_status: (() => {
       const status = item.parcel_status || 'Not sent'
       // Map any non-standard status to 'Not sent'
-      if (status === 'Not sent' || status === 'Sent to Droppex' || status === 'Failed') {
+      if (status === 'Not sent' || status === 'Sent to First Delivery' || status === 'Failed') {
         return status
       }
       return 'Not sent'
     })(),
-    droppex_response: item.droppex_response || null,
+    first_delivery_response: item.first_delivery_response || null,
     created_at_db: item.created_at_db || new Date().toISOString(),
     updated_at: item.updated_at || null,
     updated_in_shopify: item.updated_in_shopify || false,
@@ -89,14 +89,14 @@ export async function getOrders() {
   return mappedData as Order[]
 }
 
-export async function updateOrderStatus(orderId: number, status: Order['parcel_status'], droppexResponse?: Record<string, unknown>) {
+export async function updateOrderStatus(orderId: number, status: Order['parcel_status'], firstDeliveryResponse?: Record<string, unknown>) {
   const supabase = getSupabaseClient()
   
   const { error } = await supabase
-    .from('salmacollection')
+    .from('kokostore_orders')
     .update({ 
       parcel_status: status,
-      droppex_response: droppexResponse || null
+      first_delivery_response: firstDeliveryResponse || null
     })
     .eq('id', orderId)
 
@@ -109,7 +109,7 @@ export async function insertOrder(order: Omit<Order, 'parcel_status' | 'created_
   const supabase = getSupabaseClient()
   
   const { error } = await supabase
-    .from('salmacollection')
+    .from('kokostore_orders')
     .insert({
       ...order,
       parcel_status: 'Not sent',
@@ -125,7 +125,7 @@ export async function updateOrder(order: Omit<Order, 'parcel_status' | 'created_
   const supabase = getSupabaseClient()
   
   const { error } = await supabase
-    .from('salmacollection')
+    .from('kokostore_orders')
     .update({
       ...order,
       updated_at: updatedAt,
@@ -142,7 +142,7 @@ export async function clearUpdatedInShopifyFlag(orderId: number) {
   const supabase = getSupabaseClient()
   
   const { error } = await supabase
-    .from('salmacollection')
+    .from('kokostore_orders')
     .update({
       updated_in_shopify: false
     })
@@ -157,7 +157,7 @@ export async function deleteOrders(orderIds: number[]) {
   const supabase = getSupabaseClient()
   
   const { error } = await supabase
-    .from('salmacollection')
+    .from('kokostore_orders')
     .delete()
     .in('id', orderIds)
 

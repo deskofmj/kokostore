@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getOrders, updateOrderStatus, clearUpdatedInShopifyFlag } from '@/lib/supabase'
+import { getOrdersByIds, updateOrderStatus, clearUpdatedInShopifyFlag } from '@/lib/supabase'
 import { sendOrderToFirstDelivery } from '@/lib/first-delivery'
 
 export async function POST(request: NextRequest) {
@@ -13,8 +13,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const orders = await getOrders()
-    const ordersToSend = orders.filter(order => orderIds.includes(order.id))
+    // Only fetch the specific orders we need instead of all orders
+    const ordersToSend = await getOrdersByIds(orderIds)
     
     const results = []
     

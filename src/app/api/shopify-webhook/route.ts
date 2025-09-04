@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyWebhookSignature } from '@/lib/shopify'
-import { insertOrder, getOrders, updateOrder } from '@/lib/supabase'
+import { insertOrder, orderExists, updateOrder } from '@/lib/supabase'
 import { mapShopifyOrderToOrder } from '@/lib/shopify'
 
 export async function POST(request: NextRequest) {
@@ -40,11 +40,10 @@ export async function POST(request: NextRequest) {
     const data = JSON.parse(body)
     const shopifyOrder = data
 
-    // Check if order already exists
-    const existingOrders = await getOrders()
-    const orderExists = existingOrders.some(order => order.id === shopifyOrder.id)
+    // Check if order already exists (efficient targeted query)
+    const orderAlreadyExists = await orderExists(shopifyOrder.id)
 
-    if (!orderExists) {
+    if (!orderAlreadyExists) {
       // Insert new order
       const order = mapShopifyOrderToOrder(shopifyOrder)
       await insertOrder(order)
@@ -56,7 +55,7 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json({ 
       success: true, 
-      action: orderExists ? 'updated' : 'inserted',
+      action: orderAlreadyExists ? 'updated' : 'inserted',
       orderId: shopifyOrder.id 
     })
   } catch (error) {

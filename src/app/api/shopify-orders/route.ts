@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
-import { getOrders } from '@/lib/supabase'
+import { getOrdersForDashboard } from '@/lib/supabase'
 
 export async function GET() {
   try {
       // console.log('Fetching orders from database...')
-  const orders = await getOrders()
+  const orders = await getOrdersForDashboard()
   // console.log('Orders fetched:', orders.length)
     
     return NextResponse.json({ 

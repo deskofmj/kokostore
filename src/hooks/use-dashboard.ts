@@ -31,9 +31,15 @@ export function useDashboard() {
     fetchOrders()
   }, [])
 
-  // API Functions
-  const fetchOrders = async () => {
+  // API Functions with caching
+  const fetchOrders = async (forceRefresh = false) => {
+    // Don't fetch if we already have data and it's not a forced refresh
+    if (!forceRefresh && orders.length > 0 && !loading) {
+      return
+    }
+
     try {
+      setLoading(true)
       const response = await fetch('/api/shopify-orders')
       if (response.ok) {
         const data = await response.json()
@@ -87,7 +93,7 @@ export function useDashboard() {
 
       if (response.ok) {
         const data = await response.json()
-        await fetchOrders() // Refresh orders
+        await fetchOrders(true) // Force refresh orders
         setSelectedOrders([])
         
         if (data.success) {
@@ -165,7 +171,7 @@ export function useDashboard() {
 
       if (response.ok) {
         const data = await response.json()
-        await fetchOrders()
+        await fetchOrders(true)
         setSelectedOrder(null)
         
         if (data.success) {
@@ -213,7 +219,7 @@ export function useDashboard() {
 
       if (response.ok) {
         const data = await response.json()
-        await fetchOrders() // Refresh orders
+        await fetchOrders(true) // Force refresh orders
         setSelectedOrders([]) // Clear selection
         
         if (data.success) {
@@ -386,7 +392,7 @@ export function useDashboard() {
     setCurrentPage,
 
     // Functions
-    fetchOrders,
+    fetchOrders: () => fetchOrders(true), // Expose force refresh version
     handleSendToFirstDelivery,
     handlePrepareForFirstDelivery,
     handleRetryFailedOrder,

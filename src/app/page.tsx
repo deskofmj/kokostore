@@ -24,7 +24,7 @@ export default function Dashboard() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center">
-                <img src="/logo.svg" alt="Koko Store" className="h-8 w-8 sm:h-10 sm:w-10" />
+                <img src="/logodark.svg" alt="Koko Store" className="w-[100px]" />
               </div>
               
               <div className="flex items-center space-x-3">
@@ -203,10 +203,7 @@ export default function Dashboard() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
             <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
               {/* Left side - Brand */}
-              <div className="flex items-center space-x-2 sm:space-x-3">
-                <div>
-                  <img src="/logo.svg" alt="Koko Store" className="h-5 w-5 sm:h-6 sm:w-6" />
-                </div>
+              <div className="flex items-center">
                 <div>
                   <h3 className="text-base sm:text-lg font-bold text-gray-900">Koko Store</h3>
                   <p className="text-xs sm:text-sm text-gray-500">Professional Order Management</p>

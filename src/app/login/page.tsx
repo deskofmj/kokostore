@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState('')
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { login, isLoading } = useAuth()
@@ -72,7 +73,7 @@ export default function LoginPage() {
               <CardHeader className="space-y-1 pb-4 sm:pb-6">
                 <div className="flex items-center justify-center mb-4 sm:mb-6">
                   <div>
-                    <img src="/logo.svg" alt="Koko Store" className="h-6 w-6 sm:h-8 sm:w-8" />
+                    <img src="/logodark.svg" alt="Koko Store" className="w-[100px]" />
                   </div>
                 </div>
                 <CardTitle className="text-xl sm:text-2xl font-bold text-center text-slate-900">
@@ -173,7 +174,7 @@ export default function LoginPage() {
       <div 
         className="absolute inset-0 bg-cover bg-center"
         style={{
-          backgroundImage: `url('/compressed-8F7A9947-Modifier copie.webp')`
+          backgroundImage: `url('/1000019779.jpg')`
         }}
       />
       <div className="absolute inset-0 bg-black/10" />

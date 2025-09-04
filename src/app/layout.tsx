@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   title: 'Koko Store - Order Management',
   description: 'Professional order fulfillment and management system for Koko Store. Streamline your Shopify orders, track shipments, and manage customer deliveries with our integrated First Delivery fulfillment platform.',
   icons: {
-    icon: '/Favicon.png',
+    icon: '/favicon.png',
   },
   openGraph: {
     title: 'Koko Store - Order Management',

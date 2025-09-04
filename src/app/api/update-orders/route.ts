@@ -1,10 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+// Lazy initialization of Supabase client
+let supabaseClient: ReturnType<typeof createClient> | null = null
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+function getSupabaseClient() {
+  if (!supabaseClient) {
+    const supabaseUrl = process.env.SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables are required')
+    }
+    
+    supabaseClient = createClient(supabaseUrl, supabaseServiceKey)
+  }
+  
+  return supabaseClient
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,6 +30,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const supabase = getSupabaseClient()
     const results = []
     
     for (const order of orders) {

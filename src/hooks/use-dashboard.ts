@@ -263,8 +263,32 @@ export function useDashboard() {
     }
   }
 
-  const handleViewOrder = (order: Order) => {
-    setSelectedOrder(order)
+  const handleViewOrder = async (order: Order) => {
+    try {
+      // Fetch complete order details from the API
+      const response = await fetch(`/api/order-details?id=${order.id}`)
+      if (response.ok) {
+        const data = await response.json()
+        setSelectedOrder(data.order)
+      } else {
+        // Fallback to the order from the dashboard list
+        setSelectedOrder(order)
+        toast({
+          title: 'Warning',
+          description: 'Could not fetch complete order details. Showing limited information.',
+          variant: 'warning',
+        })
+      }
+    } catch (error) {
+      console.error('Error fetching order details:', error)
+      // Fallback to the order from the dashboard list
+      setSelectedOrder(order)
+      toast({
+        title: 'Warning',
+        description: 'Could not fetch complete order details. Showing limited information.',
+        variant: 'warning',
+      })
+    }
   }
 
   const handleSendOrder = (orderId: number) => {

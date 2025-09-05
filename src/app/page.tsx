@@ -137,6 +137,7 @@ export default function Dashboard() {
                   orders={dashboard.tabOrders}
                   loading={dashboard.loading}
                   selectedOrders={dashboard.selectedOrders}
+                  selectedOrder={dashboard.selectedOrder}
                   onOrderSelect={dashboard.handleOrderSelect}
                   onViewOrder={dashboard.handleViewOrder}
                   onRetryOrder={dashboard.handleRetryFailedOrder}
@@ -155,6 +156,7 @@ export default function Dashboard() {
                   orders={dashboard.tabOrders}
                   loading={dashboard.loading}
                   selectedOrders={dashboard.selectedOrders}
+                  selectedOrder={dashboard.selectedOrder}
                   onOrderSelect={dashboard.handleOrderSelect}
                   onViewOrder={dashboard.handleViewOrder}
                   onRetryOrder={dashboard.handleRetryFailedOrder}
@@ -173,6 +175,7 @@ export default function Dashboard() {
                   orders={dashboard.tabOrders}
                   loading={dashboard.loading}
                   selectedOrders={dashboard.selectedOrders}
+                  selectedOrder={dashboard.selectedOrder}
                   onOrderSelect={dashboard.handleOrderSelect}
                   onViewOrder={dashboard.handleViewOrder}
                   onRetryOrder={dashboard.handleRetryFailedOrder}

@@ -184,6 +184,7 @@ interface OrderTableProps {
   orders: Order[]
   loading: boolean
   selectedOrders: number[]
+  selectedOrder?: Order | null
   onOrderSelect: (orderId: number, selected: boolean) => void
   onViewOrder: (order: Order) => void
   onRetryOrder: (orderId: number) => void
@@ -200,6 +201,7 @@ export function OrderTable({
   orders,
   loading,
   selectedOrders,
+  selectedOrder,
   onOrderSelect,
   onViewOrder,
   onRetryOrder,
@@ -404,10 +406,10 @@ export function OrderTable({
                       </DialogTrigger>
                       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
-                          <DialogTitle>Order Details - {order.name}</DialogTitle>
+                          <DialogTitle>Order Details - {(selectedOrder || order).name}</DialogTitle>
                         </DialogHeader>
                         <OrderDetails 
-                          order={order} 
+                          order={selectedOrder || order} 
                           onSendOrder={onSendOrder}
                           onRetryOrder={onRetryOrder}
                           onRevertOrder={onRevertOrder}

@@ -123,11 +123,12 @@ export function validateOrderForFirstDelivery(order: Order): FirstDeliveryMappin
   // Phone number validation and cleaning
   const rawPhone = (order.shipping_address?.phone as string) || 
                    (order.customer?.phone as string) || 
-                   '00000000'
+                   ''
   
   // Clean phone number: remove +216 prefix and any non-digit characters
   const cleanPhoneNumber = (phoneStr: string): string => {
-    if (phoneStr === '00000000') return phoneStr
+    // If empty or null, return empty string
+    if (!phoneStr || phoneStr.trim() === '') return ''
     
     // Remove +216 prefix if present
     let cleaned = phoneStr.replace(/^\+216/, '')
@@ -146,16 +147,19 @@ export function validateOrderForFirstDelivery(order: Order): FirstDeliveryMappin
     } else if (cleaned.length > 8) {
       // If longer, take the last 8 digits
       return cleaned.slice(-8)
-    } else {
-      // If shorter, pad with zeros or return default
+    } else if (cleaned.length > 0) {
+      // If shorter but not empty, pad with zeros
       return cleaned.padEnd(8, '0')
+    } else {
+      // If empty after cleaning, return empty
+      return ''
     }
   }
   
   const phone = cleanPhoneNumber(rawPhone)
   
-  if (phone === '00000000') {
-    warnings.push('Using default phone number (00000000)')
+  if (!phone || phone === '') {
+    errors.push('Phone number is required')
   } else if (rawPhone !== phone) {
     // console.log(`Phone number cleaned: "${rawPhone}" → "${phone}"`)
   }

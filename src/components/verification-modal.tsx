@@ -310,7 +310,7 @@ export function VerificationModal({
       return
     }
 
-    await onSendToFirstDelivery(orders.map(o => o.id))
+    await onSendToFirstDelivery(updatedOrders.map(o => o.id))
     onClose()
   }
 
@@ -383,7 +383,7 @@ export function VerificationModal({
               // Better phone handling - prioritize edited values
               const phone = order.isEditing
                 ? (order.editedCustomer?.phone || order.editedShipping?.phone || order.customer?.phone || order.shipping_address?.phone || '')
-                : (customer?.phone as string) || (shipping?.phone as string) || (order.customer?.phone as string)
+                : (customer?.phone as string) || (shipping?.phone as string) || (order.customer?.phone as string) || ''
               
               // Better address handling - prioritize edited values
               const address = order.isEditing
@@ -522,12 +522,13 @@ export function VerificationModal({
                               id={`phone-${order.id}`}
                               value={order.editedCustomer?.phone || order.customer?.phone || order.shipping_address?.phone || ''}
                               onChange={(e) => handleFieldChange(order.id, 'customer.phone', e.target.value)}
+                              placeholder="Enter phone number (e.g., 12345678)"
                               className="h-9 mt-1 border-gray-300 focus:border-gray-500 focus:ring-gray-500"
                             />
                           ) : (
                             <div className="flex items-center space-x-2 text-sm mt-1 p-2 bg-white rounded border border-gray-200">
                               <Phone className="h-4 w-4 text-gray-500" />
-                              <span className="font-medium">{phone}</span>
+                              <span className="font-medium">{phone || 'No phone number'}</span>
                             </div>
                           )}
                         </div>

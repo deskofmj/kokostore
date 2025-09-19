@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     description: 'Professional order fulfillment and management system for Koko Store. Streamline your Shopify orders, track shipments, and manage customer deliveries with our integrated First Delivery fulfillment platform.',
     images: [
       {
-        url: '/compressed-opengraph.webp',
+        url: '/compressed-opengraph image.webp',
         width: 1200,
         height: 630,
         alt: 'Koko Store Order Management System',
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Koko Store - Order Management',
     description: 'Professional order fulfillment and management system for Koko Store. Streamline your Shopify orders, track shipments, and manage customer deliveries with our integrated First Delivery fulfillment platform.',
-    images: ['/compressed-opengraph.webp'],
+    images: ['/compressed-opengraph image.webp'],
   },
 }
 

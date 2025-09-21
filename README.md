@@ -172,7 +172,7 @@ Orders can have the following parcel statuses:
 - Bulk send multiple orders (up to 100 at once)
 - Track success/failure status
 - Store First Delivery responses for debugging
-- Rate limiting compliance (1 req/sec for single, 2 req/10sec for bulk)
+- Rate limiting compliance (1 req/10sec for both single and bulk)
 - Proper error handling and response parsing
 
 ### Real-time Updates

@@ -5,8 +5,8 @@ const FIRST_DELIVERY_CONFIG = {
   baseUrl: process.env.FIRST_DELIVERY_BASE_URL || 'https://api.firstdelivery.com',
   token: process.env.FIRST_DELIVERY_TOKEN || '',
   rateLimit: {
-    singleOrder: 1000, // 1 request per second
-    bulkOrders: 10000  // 2 requests every 10 seconds
+    singleOrder: 10000, // 10 seconds between requests (as per First Delivery API docs)
+    bulkOrders: 10000   // 10 seconds between requests (as per First Delivery API docs)
   }
 }
 

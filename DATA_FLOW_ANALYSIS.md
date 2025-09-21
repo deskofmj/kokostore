@@ -180,8 +180,8 @@ const qualityScore = Math.max(0, 100 - (issues.length * 20) - (warnings.length *
 ## 🚀 **First Delivery API Integration**
 
 ### **Rate Limiting**
-- **Single orders**: 1 request per second
-- **Bulk orders**: 2 requests every 10 seconds
+- **Single orders**: 1 request every 10 seconds
+- **Bulk orders**: 1 request every 10 seconds
 - **Implementation**: Built-in rate limiting with automatic retry
 
 ### **Error Handling**
@@ -227,9 +227,9 @@ return {
 ## 📈 **Performance Optimizations**
 
 ### **Bulk Operations**
-- Send up to 100 orders at once
-- Automatic rate limiting compliance
-- Efficient batch processing
+- Send up to 100 orders at once - **NOW IMPLEMENTED**
+- Automatic rate limiting compliance (10 seconds between requests)
+- Efficient batch processing with single API call
 
 ### **Caching**
 - Status caching to reduce API calls

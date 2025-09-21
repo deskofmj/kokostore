@@ -44,8 +44,8 @@ This document describes the complete integration of First Delivery API into the 
 - **Header:** `Authorization: Bearer {token}`
 
 ### **Rate Limiting**
-- **Single orders:** 1 request per second
-- **Bulk orders:** 2 requests every 10 seconds
+- **Single orders:** 1 request every 10 seconds
+- **Bulk orders:** 1 request every 10 seconds
 
 ### **Order Format**
 ```json
@@ -96,8 +96,8 @@ Run the migration script to update your existing database:
 
 ### **Order Management**
 - ✅ Send individual orders to First Delivery
-- ✅ Send bulk orders (up to 100 at once)
-- ✅ Rate limiting compliance
+- ✅ Send bulk orders (up to 100 at once) - **NOW IMPLEMENTED**
+- ✅ Rate limiting compliance (10 seconds between requests)
 - ✅ Error handling and retry logic
 
 ### **Status Tracking**

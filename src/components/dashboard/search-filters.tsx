@@ -14,6 +14,8 @@ interface SearchFiltersProps {
   onSendSelected: () => void
   onDeleteSelected: () => void
   sendingOrders: boolean
+  selectedOrders: number[]
+  orders: any[]
 }
 
 export function SearchFilters({
@@ -22,13 +24,27 @@ export function SearchFilters({
   selectedOrdersCount,
   onSendSelected,
   onDeleteSelected,
-  sendingOrders
+  sendingOrders,
+  selectedOrders,
+  orders
 }: SearchFiltersProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const handleDeleteClick = () => {
     setShowDeleteDialog(true)
   }
+
+  // Check if any selected orders can be sent (Not sent or Failed status)
+  const canSendSelectedOrders = selectedOrders.some(orderId => {
+    const order = orders.find(o => o.id === orderId)
+    return order && (order.parcel_status === 'Not sent' || order.parcel_status === 'Failed')
+  })
+
+  // Count how many selected orders can be sent
+  const sendableOrdersCount = selectedOrders.filter(orderId => {
+    const order = orders.find(o => o.id === orderId)
+    return order && (order.parcel_status === 'Not sent' || order.parcel_status === 'Failed')
+  }).length
 
   const handleConfirmDelete = () => {
     onDeleteSelected()
@@ -53,15 +69,22 @@ export function SearchFilters({
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             {selectedOrdersCount > 0 && (
               <>
-                <Button
-                  onClick={onSendSelected}
-                  disabled={sendingOrders}
-                  className="bg-black hover:bg-gray-800 text-white font-medium h-10 sm:h-12 px-4 sm:px-6 text-sm"
-                >
-                  <Send className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Send {selectedOrdersCount} to First Delivery</span>
-                  <span className="sm:hidden">Send {selectedOrdersCount}</span>
-                </Button>
+                {canSendSelectedOrders && (
+                  <Button
+                    onClick={onSendSelected}
+                    disabled={sendingOrders}
+                    className="bg-black hover:bg-gray-800 text-white font-medium h-10 sm:h-12 px-4 sm:px-6 text-sm"
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Send {sendableOrdersCount} to First Delivery</span>
+                    <span className="sm:hidden">Send {sendableOrdersCount}</span>
+                  </Button>
+                )}
+                {!canSendSelectedOrders && selectedOrdersCount > 0 && (
+                  <div className="text-sm text-gray-500 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200">
+                    Selected orders are already sent or cannot be sent
+                  </div>
+                )}
                 <Button
                   onClick={handleDeleteClick}
                   disabled={sendingOrders}

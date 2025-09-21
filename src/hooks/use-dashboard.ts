@@ -129,7 +129,21 @@ export function useDashboard() {
   }
 
   const handlePrepareForFirstDelivery = (orderIds: number[]) => {
-    const selectedOrders = orders.filter(order => orderIds.includes(order.id))
+    // Only include orders that can be sent (Not sent or Failed status)
+    const selectedOrders = orders.filter(order => 
+      orderIds.includes(order.id) && 
+      (order.parcel_status === 'Not sent' || order.parcel_status === 'Failed')
+    )
+    
+    if (selectedOrders.length === 0) {
+      toast({
+        title: 'No orders to send',
+        description: 'Selected orders are already sent or cannot be sent.',
+        variant: 'destructive',
+      })
+      return
+    }
+    
     setOrdersToSend(selectedOrders)
     setShowVerificationModal(true)
     toast({

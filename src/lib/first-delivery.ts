@@ -33,6 +33,21 @@ export interface FirstDeliveryOrder {
   Produit: FirstDeliveryProduct
 }
 
+// New interfaces for bulk orders (without nombreEchange field)
+export interface FirstDeliveryBulkProduct {
+  article: string
+  prix: number
+  designation: string
+  nombreArticle: number
+  commentaire: string
+  // nombreEchange is NOT included for bulk API
+}
+
+export interface FirstDeliveryBulkOrder {
+  Client: FirstDeliveryClient
+  Produit: FirstDeliveryBulkProduct
+}
+
 export interface FirstDeliveryResponse {
   success: boolean
   tracking_number?: string
@@ -138,7 +153,8 @@ export async function sendBulkOrdersToFirstDelivery(orders: Order[]): Promise<Fi
       }
     }
 
-    const firstDeliveryOrders = orders.map(order => mapOrderToFirstDeliveryFormat(order))
+    // Use the new bulk mapping function that omits nombreEchange
+    const firstDeliveryOrders = orders.map(order => mapOrderToFirstDeliveryBulkFormat(order))
     
     const response = await fetch(`${FIRST_DELIVERY_CONFIG.baseUrl}/bulk-create`, {
       method: 'POST',
@@ -241,6 +257,7 @@ export async function getFirstDeliveryOrders(pageNumber: number = 1, limit: numb
 // Import the validation function from data-mapping
 import { validateOrderForFirstDelivery } from './data-mapping'
 
+// Mapping function for single orders (includes nombreEchange: 0)
 export function mapOrderToFirstDeliveryFormat(order: Order): FirstDeliveryOrder {
   // Use the validation function to get properly mapped data
   const validation = validateOrderForFirstDelivery(order)
@@ -262,6 +279,32 @@ export function mapOrderToFirstDeliveryFormat(order: Order): FirstDeliveryOrder 
       nombreArticle: validation.mappedData.nombreArticle as number,
       commentaire: validation.mappedData.commentaire as string,
       nombreEchange: 0
+    }
+  }
+}
+
+// New mapping function for bulk orders (omits nombreEchange field)
+export function mapOrderToFirstDeliveryBulkFormat(order: Order): FirstDeliveryBulkOrder {
+  // Use the validation function to get properly mapped data
+  const validation = validateOrderForFirstDelivery(order)
+  
+  // Return the validated and mapped data for bulk API
+  return {
+    Client: {
+      nom: validation.mappedData.nom as string,
+      gouvernerat: validation.mappedData.gouvernerat as string,
+      ville: validation.mappedData.ville as string,
+      adresse: validation.mappedData.adresse as string,
+      telephone: validation.mappedData.telephone as string,
+      telephone2: validation.mappedData.telephone2 as string || ''
+    },
+    Produit: {
+      article: validation.mappedData.article as string,
+      prix: validation.mappedData.prix as number,
+      designation: validation.mappedData.designation as string,
+      nombreArticle: validation.mappedData.nombreArticle as number,
+      commentaire: validation.mappedData.commentaire as string
+      // nombreEchange is intentionally omitted for bulk API
     }
   }
 }

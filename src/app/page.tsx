@@ -90,9 +90,11 @@ export default function Dashboard() {
             searchTerm={dashboard.searchTerm}
             onSearchChange={dashboard.setSearchTerm}
             selectedOrdersCount={dashboard.selectedOrders.length}
-                            onSendSelected={() => dashboard.handlePrepareForFirstDelivery(dashboard.selectedOrders)}
+            onSendSelected={() => dashboard.handlePrepareForFirstDelivery(dashboard.selectedOrders)}
             onDeleteSelected={() => dashboard.handleDeleteOrders(dashboard.selectedOrders)}
             sendingOrders={dashboard.sendingOrders}
+            selectedOrders={dashboard.selectedOrders}
+            orders={dashboard.orders}
           />
 
           {/* Orders Table */}

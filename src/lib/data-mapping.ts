@@ -1,6 +1,41 @@
 import { Order } from './supabase'
 import { getGovernorateFromPostalCode } from './postal-codes'
 
+/**
+ * Maps internal governorate names to First Delivery accepted format
+ */
+export function mapGovernorateForFirstDelivery(governorate: string): string {
+  const firstDeliveryMapping: Record<string, string> = {
+    'Béni Arous': 'Ben Arous',
+    'Béja': 'Beja',
+    'Kébili': 'Kebili',
+    'Médenine': 'Medenine',
+    'Le Kef': 'Le Kef',
+    'Sidi Bouzid': 'Sidi Bouzid',
+    // Keep other governorates as they are
+    'Tunis': 'Tunis',
+    'Sousse': 'Sousse',
+    'Monastir': 'Monastir',
+    'Mahdia': 'Mahdia',
+    'Sfax': 'Sfax',
+    'Gabès': 'Gabès',
+    'Gafsa': 'Gafsa',
+    'Tozeur': 'Tozeur',
+    'Kairouan': 'Kairouan',
+    'Kasserine': 'Kasserine',
+    'Zaghouan': 'Zaghouan',
+    'Nabeul': 'Nabeul',
+    'Jendouba': 'Jendouba',
+    'Siliana': 'Siliana',
+    'Bizerte': 'Bizerte',
+    'Ariana': 'Ariana',
+    'Manouba': 'Manouba',
+    'Tataouine': 'Tataouine'
+  }
+  
+  return firstDeliveryMapping[governorate] || governorate
+}
+
 export interface DataMappingResult {
   success: boolean
   mappedData: Record<string, unknown>
@@ -450,9 +485,18 @@ export function validateOrderForFirstDelivery(order: Order): FirstDeliveryMappin
     ? `${order.note} | ${libelleContent}`
     : libelleContent
 
+  // Map governorate to First Delivery format
+  const rawGovernorate = order.shipping_address?.province || detectedGovernorate || 'Tunis'
+  const firstDeliveryGovernorate = mapGovernorateForFirstDelivery(rawGovernorate)
+  
+  // Add warning if governorate was mapped
+  if (rawGovernorate !== firstDeliveryGovernorate) {
+    warnings.push(`Governorate mapped for First Delivery: "${rawGovernorate}" → "${firstDeliveryGovernorate}"`)
+  }
+  
   const mappedData = {
     nom: customerName,
-    gouvernerat: order.shipping_address?.province || detectedGovernorate || 'Tunis',
+    gouvernerat: firstDeliveryGovernorate,
     ville: order.shipping_address?.city || '',
     adresse: getFullAddress(), // Use full address (address1 + address2)
     telephone: phone,

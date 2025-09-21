@@ -195,8 +195,6 @@ export function validateOrderForFirstDelivery(order: Order): FirstDeliveryMappin
   
   if (!phone || phone === '') {
     errors.push('Phone number is required')
-  } else if (rawPhone !== phone) {
-    // console.log(`Phone number cleaned: "${rawPhone}" → "${phone}"`)
   }
   
   // Address validation

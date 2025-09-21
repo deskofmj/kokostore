@@ -12,7 +12,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // console.log(`Verifying First Delivery order with tracking number: ${trackingNumber}`)
     
     const firstDeliveryResponse = await getFirstDeliveryOrderStatus(trackingNumber)
     

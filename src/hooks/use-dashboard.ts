@@ -97,11 +97,31 @@ export function useDashboard() {
         setSelectedOrders([])
         
         if (data.success) {
-          toast({
-            title: 'Orders sent to First Delivery',
-            description: `Successfully sent ${orderIds.length} orders to First Delivery.`,
-            variant: 'success',
-          })
+          const { summary } = data
+          const { successful, failed, total } = summary
+          
+          if (failed === 0) {
+            // All orders succeeded
+            toast({
+              title: 'Orders sent to First Delivery',
+              description: `Successfully sent ${successful} orders to First Delivery.`,
+              variant: 'success',
+            })
+          } else if (successful === 0) {
+            // All orders failed
+            toast({
+              title: 'Failed to send orders to First Delivery',
+              description: `All ${failed} orders failed to send. Please check the orders and try again.`,
+              variant: 'destructive',
+            })
+          } else {
+            // Partial success - some succeeded, some failed
+            toast({
+              title: 'Partial success - Some orders failed',
+              description: `${successful} orders sent successfully, ${failed} orders failed. Check the Failed Orders tab to retry failed orders.`,
+              variant: 'warning',
+            })
+          }
         } else {
           toast({
             title: 'Failed to send orders to First Delivery',

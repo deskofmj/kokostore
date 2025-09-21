@@ -86,16 +86,37 @@ export async function POST(request: NextRequest) {
         const firstDeliveryResponse = await sendBulkOrdersToFirstDelivery(eligibleOrders)
         
         if (firstDeliveryResponse.success) {
-          // Update all orders as sent successfully
-          for (const order of eligibleOrders) {
-            await updateOrderStatus(order.id, 'Sent to First Delivery', firstDeliveryResponse as unknown as Record<string, unknown>)
-            // Clear the "Updated in Shopify" flag when order is sent to First Delivery
-            await clearUpdatedInShopifyFlag(order.id)
-            results.push({
-              orderId: order.id,
-              success: true,
-              trackingNumber: firstDeliveryResponse.tracking_number || `bulk-${order.id}`
-            })
+          // Handle both complete success (201) and partial success (207)
+          const barcodes = firstDeliveryResponse.result?.barCodes as Array<{index: number, barCode: string}> || []
+          const successfulIndices = new Set(barcodes.map(bc => bc.index))
+          
+          // Process each order based on whether it got a barcode
+          for (let i = 0; i < eligibleOrders.length; i++) {
+            const order = eligibleOrders[i]
+            
+            if (successfulIndices.has(i)) {
+              // Order was successfully processed - got a barcode
+              const barcode = barcodes.find(bc => bc.index === i)?.barCode
+              await updateOrderStatus(order.id, 'Sent to First Delivery', firstDeliveryResponse as unknown as Record<string, unknown>)
+              // Clear the "Updated in Shopify" flag when order is sent to First Delivery
+              await clearUpdatedInShopifyFlag(order.id)
+              results.push({
+                orderId: order.id,
+                success: true,
+                trackingNumber: barcode || firstDeliveryResponse.tracking_number || `bulk-${order.id}`
+              })
+            } else {
+              // Order failed to be processed - no barcode
+              await updateOrderStatus(order.id, 'Failed', {
+                ...firstDeliveryResponse as unknown as Record<string, unknown>,
+                error: 'Order was not processed by First Delivery (partial batch failure)'
+              })
+              results.push({
+                orderId: order.id,
+                success: false,
+                error: 'Order was not processed by First Delivery (partial batch failure)'
+              })
+            }
           }
         } else {
           // Update all orders as failed
